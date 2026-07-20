@@ -58,7 +58,15 @@ try {
     const accessibleSvg = svg
       .replace("<svg ", `<svg aria-label="${id}" `)
       .replace('role="graphics-document document"', 'role="img"')
+      .replace(/<br\s*\/?\s*>/gi, "<br/>")
       .replace(/style="max-width: [^"]+;"/, "style=\"max-width: 100%; background: #0d1117;\"");
+    const parseError = await page.evaluate((markup) => {
+      const document = new DOMParser().parseFromString(markup, "image/svg+xml");
+      return document.querySelector("parsererror")?.textContent ?? null;
+    }, accessibleSvg);
+    if (parseError) {
+      throw new Error(`Generated invalid SVG for ${sourceFile}: ${parseError}`);
+    }
     await fs.writeFile(
       path.join(outputDirectory, sourceFile.replace(/\.mmd$/, ".svg")),
       `${accessibleSvg}\n`
