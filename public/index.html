@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="TxSentinel evaluates proposed onchain actions before an autonomous agent signs them." />
+    <title>TxSentinel</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #070a0c; color: #f5f7f8; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at 50% 0%, #10202a 0, #070a0c 48%); }
+      main { width: min(780px, calc(100% - 40px)); padding: 48px 0; }
+      .mark { width: 72px; height: 72px; display: block; border-radius: 8px; }
+      h1 { margin: 24px 0 10px; font-size: clamp(38px, 8vw, 72px); line-height: 1; letter-spacing: 0; }
+      p { color: #aab6bd; font-size: 18px; line-height: 1.6; max-width: 650px; }
+      .flow { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 8px; }
+      .flow span { border: 1px solid #28343a; padding: 9px 12px; border-radius: 6px; color: #d9e1e5; }
+      a { display: inline-block; margin-top: 30px; color: #071013; background: #d8ff22; padding: 12px 16px; border-radius: 6px; font-weight: 700; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img class="mark" src="/txsentinel-avatar.png" alt="TxSentinel shield and transaction decision mark" />
+      <h1>TxSentinel</h1>
+      <p>A deterministic transaction policy firewall for autonomous agents. Evaluate proposed onchain actions and receive an explainable ALLOW, HOLD, or DENY receipt before signing.</p>
+      <div class="flow" aria-label="Service flow">
+        <span>Proposed action</span><span>Policy evaluation</span><span>Decision receipt</span>
+      </div>
+      <a href="/api/check">Inspect the API</a>
+    </main>
+  </body>
+</html>

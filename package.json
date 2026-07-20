@@ -1,0 +1,15 @@
+{
+  "name": "txsentinel-okx",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic transaction policy decisions for autonomous agents.",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check api/check.js && node --check api/health.js && node --check lib/policy.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
+
