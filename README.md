@@ -1,3 +1,5 @@
+<p align="right"><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
+
 # 🛡️ TxSentinel
 
 > A deterministic transaction policy firewall for autonomous agents.
@@ -127,6 +129,22 @@ npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 
 The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainnet (`eip155:196`) only after end-to-end testnet settlement evidence exists.
 
+### Settlement readiness
+
+| Requirement | Status |
+| --- | --- |
+| Official OKX x402 middleware and EVM scheme | ✅ Implemented |
+| Public paid endpoint | ✅ Deployed at [`/api/check-paid`](https://txsentinel-okx.vercel.app/api/check-paid) |
+| X Layer Testnet configuration (`eip155:1952`) | ✅ Implemented |
+| OKX Developer Portal API credentials in Vercel | ⏳ Required |
+| EVM receiving address in `PAY_TO_ADDRESS` | ⏳ Required |
+| Buyer wallet funded with X Layer Testnet USD₮0 | ⏳ Required |
+| Settled transaction hash and `PAYMENT-RESPONSE` evidence | ⏳ Final verification |
+
+Once the three configuration requirements are supplied, redeploy the service and run the documented
+`402 → sign → retry → settle` flow with Agentic Wallet. See the
+[official OKX seller SDK guide](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk).
+
 ## 🔗 X Layer Receipt Anchor
 
 The optional `TxSentinelPolicyAnchor` contract stores immutable policy-version snapshots and
@@ -209,4 +227,4 @@ test/                 Policy and HTTP contract tests
 - ✅ Live policy product and public API: complete
 - ✅ ASP `#6828` activation and listing review: submitted
 - ✅ Official x402 server integration: implemented
-- ⏳ Real x402 settlement: pending deployment credentials and funded testnet payer evidence
+- ⏳ Real x402 settlement: ready to activate after facilitator credentials, `PAY_TO_ADDRESS`, and testnet USD₮0 are supplied
