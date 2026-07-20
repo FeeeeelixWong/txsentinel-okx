@@ -1,0 +1,5 @@
+flowchart LR
+  V1["Policy revision 1"] --> R1["Receipt stores revision 1"]
+  V1 -->|"updatePolicy"| V2["Policy revision 2"]
+  V2 --> R2["Receipt stores revision 2"]
+  V2 -. "cannot mutate" .-> R1

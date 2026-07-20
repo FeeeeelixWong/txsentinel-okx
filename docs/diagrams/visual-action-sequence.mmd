@@ -1,0 +1,30 @@
+sequenceDiagram
+  actor A as Agent or user
+  participant T as TxSentinel API
+  participant W as OKX Wallet
+  participant C as Canonical X Layer contract
+  participant D as Target dApp or recipient
+
+  Note over W,C: ONE TIME PER POLICY OWNER
+  W->>C: registerPolicy(policyKey, policyHash, versionHash)
+  C-->>W: PolicyRegistered(owner, revision 1)
+
+  Note over A,C: EACH POLICY EVALUATION
+  A->>T: POST /api/check(action, policy, evidence)
+  T->>T: Normalize, validate, evaluate, hash
+  T-->>A: decision + reasons + actionDigest + receiptHash
+
+  opt Independently verifiable evidence
+    A->>W: Ask to attest receipt
+    W->>C: anchorReceipt(receiptHash, actionDigest, decision)
+    C-->>W: ReceiptAnchored(policy revision, block time)
+  end
+
+  alt Decision is ALLOW
+    A->>W: Separately request the underlying transaction
+    W->>D: Sign and submit only after wallet confirmation
+  else Decision is HOLD
+    A-->>A: Wait for human approval or more evidence
+  else Decision is DENY
+    A-->>A: Do not request execution
+  end

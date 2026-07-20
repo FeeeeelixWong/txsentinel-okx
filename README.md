@@ -12,16 +12,7 @@ TxSentinel is a deterministic transaction policy firewall for autonomous agents.
 
 ## Product in One Picture
 
-```mermaid
-flowchart LR
-  A["Agent proposes an action"] --> B["TxSentinel checks<br/>policy + evidence"]
-  B --> C{"Decision"}
-  C -->|"ALLOW"| D["Wallet may execute"]
-  C -->|"HOLD"| E["Human review"]
-  C -->|"DENY"| F["Stop"]
-  C --> G["Deterministic receipt"]
-  G -->|"OKX Wallet attestation"| H["X Layer<br/>Policy Anchor"]
-```
+![TxSentinel product flow](docs/assets/product-overview.svg)
 
 TxSentinel runs **after an action is constructed but before it is signed**. The policy decision is
 made offchain for speed and explainability. A wallet can then anchor the receipt to X Layer for
@@ -29,25 +20,7 @@ independent evidence without giving the contract custody or execution authority.
 
 ## What Is Onchain?
 
-```mermaid
-sequenceDiagram
-  actor U as Policy owner
-  participant T as TxSentinel API
-  participant W as OKX Wallet
-  participant C as X Layer Anchor
-
-  Note over W,C: One-time policy setup
-  U->>W: Confirm Policy v1
-  W->>C: registerPolicy(policyKey, policyHash, versionHash)
-  C-->>W: PolicyRegistered
-
-  Note over U,C: Repeated for actions that need evidence
-  U->>T: Proposed action + policy + simulation evidence
-  T-->>U: ALLOW / HOLD / DENY + receiptHash
-  U->>W: Confirm receipt attestation
-  W->>C: anchorReceipt(receiptHash, actionDigest, decision)
-  C-->>W: ReceiptAnchored
-```
+![TxSentinel onchain sequence](docs/assets/onchain-sequence.svg)
 
 `registerPolicy` does not approve tokens or move funds. It binds a wallet to a policy hash and
 revision. `anchorReceipt` stores evidence of a decision; it does not execute the underlying action.

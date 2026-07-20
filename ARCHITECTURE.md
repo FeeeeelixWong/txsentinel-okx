@@ -2,18 +2,7 @@
 
 ## System Boundary
 
-```mermaid
-flowchart LR
-  A["Autonomous agent"] -->|"proposed action + policy"| F["Free /api/check"]
-  A -->|"unpaid request"| X["Paid /api/check-paid"]
-  X -->|"402 PAYMENT-REQUIRED"| W["OKX Agentic Wallet"]
-  W -->|"PAYMENT-SIGNATURE"| X
-  X <-->|"verify + settle"| O["OKX x402 facilitator"]
-  F --> P["Pure policy engine"]
-  X --> P
-  P --> R["ALLOW / HOLD / DENY receipt"]
-  R -->|"optional wallet attestation"| C["X Layer Policy Anchor"]
-```
+![TxSentinel system boundary](docs/assets/architecture-system-boundary.svg)
 
 TxSentinel is placed before signing. It receives only a proposed action, policy constraints, and optional simulation evidence. It never receives a private key and exposes no signing or transaction-submission method.
 
@@ -21,21 +10,7 @@ For a product-first walkthrough, see [docs/VISUAL_GUIDE.md](docs/VISUAL_GUIDE.md
 
 ## Component Responsibilities
 
-```mermaid
-flowchart TB
-  UI["Product console"] --> API["Free or x402 API boundary"]
-  AGENT["Agent integration"] --> API
-  API --> VALIDATE["Strict schema validation"]
-  VALIDATE --> ENGINE["Pure deterministic policy engine"]
-  ENGINE --> RECEIPT["Decision + reasons + stable hashes"]
-  RECEIPT --> UI
-  RECEIPT --> AGENT
-  RECEIPT --> WALLET["OKX Wallet confirmation"]
-  WALLET --> ANCHOR["Canonical X Layer Policy Anchor"]
-
-  SIM["Supplied simulation evidence"] --> VALIDATE
-  POLICY["Owner policy settings"] --> VALIDATE
-```
+![TxSentinel component responsibilities](docs/assets/architecture-components.svg)
 
 | Component | Responsibility | State |
 | --- | --- | --- |
@@ -99,26 +74,11 @@ execution.
 
 ### Storage relationships
 
-```mermaid
-flowchart LR
-  OWNER["owner address"] --> POLICY["policies owner + policyKey"]
-  KEY["policyKey"] --> POLICY
-  POLICY --> CURRENT["policyHash + versionHash<br/>revision + active"]
-  POLICY --> RECEIPTS["receipts owner + policyKey + receiptHash"]
-  RECEIPTS --> SNAPSHOT["actionDigest + decision<br/>policy snapshot + submitter + time"]
-  OWNER --> DELEGATE["policy-scoped delegate"]
-  DELEGATE -->|"authorized anchor only"| RECEIPTS
-```
+![X Layer storage relationships](docs/assets/architecture-storage.svg)
 
 ### Version behavior
 
-```mermaid
-flowchart LR
-  V1["Policy revision 1"] --> R1["Receipt stores revision 1"]
-  V1 -->|"updatePolicy"| V2["Policy revision 2"]
-  V2 --> R2["Receipt stores revision 2"]
-  V2 -. "cannot mutate" .-> R1
-```
+![Policy version behavior](docs/assets/architecture-versions.svg)
 
 ### Pre-deployment review
 

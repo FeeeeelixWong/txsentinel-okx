@@ -1,0 +1,7 @@
+flowchart LR
+  subgraph NOW["Current evidence model"]
+    A["Policy decision"] --> B["Wallet attestation"] --> C["X Layer receipt"]
+  end
+  subgraph FUTURE["Production enforcement option"]
+    D["Policy decision"] --> E["Safe module or ERC-4337 validator"] --> F["Execution allowed only with valid receipt"]
+  end

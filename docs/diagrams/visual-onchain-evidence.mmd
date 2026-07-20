@@ -1,0 +1,6 @@
+flowchart LR
+  A["Reviewed Solidity source"] --> B["Reproducible compiler artifact"]
+  B --> C["Canonical deployment<br/>0x295975...bb213"]
+  C --> D["Runtime bytecode hash<br/>0xd81838...c763"]
+  D --> E["Policy registration<br/>next one-time action"]
+  E --> F["Live receipt anchor"]

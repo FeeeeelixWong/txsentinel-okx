@@ -1,0 +1,17 @@
+sequenceDiagram
+  actor U as Policy owner
+  participant T as TxSentinel API
+  participant W as OKX Wallet
+  participant C as X Layer Anchor
+
+  Note over W,C: One-time policy setup
+  U->>W: Confirm Policy v1
+  W->>C: registerPolicy(policyKey, policyHash, versionHash)
+  C-->>W: PolicyRegistered
+
+  Note over U,C: Repeated for actions that need evidence
+  U->>T: Proposed action + policy + simulation evidence
+  T-->>U: ALLOW / HOLD / DENY + receiptHash
+  U->>W: Confirm receipt attestation
+  W->>C: anchorReceipt(receiptHash, actionDigest, decision)
+  C-->>W: ReceiptAnchored

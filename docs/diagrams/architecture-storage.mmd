@@ -1,0 +1,8 @@
+flowchart LR
+  OWNER["owner address"] --> POLICY["policies owner + policyKey"]
+  KEY["policyKey"] --> POLICY
+  POLICY --> CURRENT["policyHash + versionHash<br/>revision + active"]
+  POLICY --> RECEIPTS["receipts owner + policyKey + receiptHash"]
+  RECEIPTS --> SNAPSHOT["actionDigest + decision<br/>policy snapshot + submitter + time"]
+  OWNER --> DELEGATE["policy-scoped delegate"]
+  DELEGATE -->|"authorized anchor only"| RECEIPTS

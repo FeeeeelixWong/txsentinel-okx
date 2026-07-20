@@ -1,0 +1,7 @@
+flowchart LR
+  O["Policy owner address"] --> N["Owner-scoped namespace"]
+  K["Policy key"] --> N
+  N --> P["Current policy<br/>policyHash<br/>versionHash<br/>revision<br/>active"]
+  P --> R1["Receipt A snapshot<br/>revision 1 + decision"]
+  P --> R2["Receipt B snapshot<br/>revision 2 + decision"]
+  D["Policy-scoped delegate"] -->|"may anchor only when authorized"| R2

@@ -1,0 +1,10 @@
+flowchart LR
+  A["Autonomous agent"] -->|"proposed action + policy"| F["Free /api/check"]
+  A -->|"unpaid request"| X["Paid /api/check-paid"]
+  X -->|"402 PAYMENT-REQUIRED"| W["OKX Agentic Wallet"]
+  W -->|"PAYMENT-SIGNATURE"| X
+  X <-->|"verify + settle"| O["OKX x402 facilitator"]
+  F --> P["Pure policy engine"]
+  X --> P
+  P --> R["ALLOW / HOLD / DENY receipt"]
+  R -->|"optional wallet attestation"| C["X Layer Policy Anchor"]

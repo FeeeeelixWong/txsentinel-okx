@@ -1,0 +1,8 @@
+flowchart LR
+  U["Unregistered"] -->|"registerPolicy"| V1["Active policy<br/>revision 1"]
+  V1 -->|"anchorReceipt"| R1["Immutable receipt<br/>revision 1 snapshot"]
+  V1 -->|"updatePolicy"| V2["Active policy<br/>revision 2"]
+  V2 -->|"anchorReceipt"| R2["Immutable receipt<br/>revision 2 snapshot"]
+  V2 -->|"setPolicyActive false"| I["Inactive policy"]
+  I -->|"setPolicyActive true"| V2
+  V2 -. "cannot rewrite" .-> R1

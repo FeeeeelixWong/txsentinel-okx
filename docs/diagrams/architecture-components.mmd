@@ -1,0 +1,12 @@
+flowchart TB
+  UI["Product console"] --> API["Free or x402 API boundary"]
+  AGENT["Agent integration"] --> API
+  API --> VALIDATE["Strict schema validation"]
+  VALIDATE --> ENGINE["Pure deterministic policy engine"]
+  ENGINE --> RECEIPT["Decision + reasons + stable hashes"]
+  RECEIPT --> UI
+  RECEIPT --> AGENT
+  RECEIPT --> WALLET["OKX Wallet confirmation"]
+  WALLET --> ANCHOR["Canonical X Layer Policy Anchor"]
+  SIM["Supplied simulation evidence"] --> VALIDATE
+  POLICY["Owner policy settings"] --> VALIDATE

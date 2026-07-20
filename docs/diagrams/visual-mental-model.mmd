@@ -1,0 +1,8 @@
+flowchart LR
+  A["1. Agent constructs<br/>a proposed action"] --> B["2. TxSentinel evaluates<br/>rules and evidence"]
+  B --> C{"3. Decision"}
+  C -->|"ALLOW"| D["Wallet may continue"]
+  C -->|"HOLD"| E["Ask a human"]
+  C -->|"DENY"| F["Stop the action"]
+  C --> G["4. Produce deterministic<br/>action and receipt hashes"]
+  G --> H["5. Optional X Layer<br/>receipt attestation"]

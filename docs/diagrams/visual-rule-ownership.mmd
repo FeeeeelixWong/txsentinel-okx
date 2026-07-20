@@ -1,0 +1,17 @@
+flowchart TB
+  subgraph USER["Policy owner controls"]
+    U1["Maximum spend"]
+    U2["Recipient allowlist / blocklist"]
+    U3["Simulation and verification requirements"]
+    U4["Slippage and fee limits"]
+  end
+  subgraph SYSTEM["TxSentinel always enforces"]
+    S1["Strict request schema"]
+    S2["Supported chains and operations"]
+    S3["Finite non-negative values"]
+    S4["Deterministic normalization"]
+  end
+  USER --> P["Normalized policy snapshot"]
+  SYSTEM --> P
+  P --> E["Pure decision engine"]
+  E --> R["ALLOW / HOLD / DENY receipt"]

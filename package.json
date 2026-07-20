@@ -13,6 +13,7 @@
     "check": "node --check api/check.js && node --check api/check-paid.js && node --check api/health.js && node --check lib/policy.js && node --check public/app.js && node --check public/onchain.js && node --check scripts/compile-contract.mjs && npm run contract:lint",
     "smoke": "node scripts/smoke.mjs",
     "demo:record": "node scripts/record-demo.mjs",
+    "docs:diagrams": "node scripts/render-doc-diagrams.mjs",
     "contract:compile": "node scripts/compile-contract.mjs",
     "contract:lint": "solhint 'contracts/**/*.sol'",
     "contract:test": "npm run contract:compile && node --test test/contract.test.mjs"

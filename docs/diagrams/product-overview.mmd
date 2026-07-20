@@ -1,0 +1,8 @@
+flowchart TB
+  A["Agent proposes an action"] --> B["TxSentinel checks policy and evidence"]
+  B --> C{"Decision"}
+  C -->|"ALLOW"| D["Wallet may execute"]
+  C -->|"HOLD"| E["Human review"]
+  C -->|"DENY"| F["Stop"]
+  C --> G["Deterministic receipt"]
+  G -->|"OKX Wallet attestation"| H["X Layer Policy Anchor"]
