@@ -183,6 +183,8 @@ pre { max-height: 360px; margin: 0; padding: 14px; overflow: auto; border: 1px s
 .step-command { min-height: 44px; padding: 0 14px; border: 1px solid var(--lime); border-radius: 4px; background: var(--lime); color: #080b0d; font-size: 12px; font-weight: 800; cursor: pointer; }
 .step-command:hover { background: #dcff61; }
 .step-command.secondary { border-color: var(--line-strong); background: var(--surface-2); color: #dbe1e4; }
+.command-link { display: grid; place-items: center; text-decoration: none; }
+.command-link.disabled { pointer-events: none; opacity: 0.45; }
 .step-command:disabled { border-color: var(--line); background: #171e22; color: #5d6a71; cursor: not-allowed; }
 .step-actions { display: grid; gap: 8px; }
 .existing-contract { max-width: 650px; margin-top: 16px; }

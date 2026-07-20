@@ -1,10 +1,10 @@
 const byId = (id) => document.getElementById(id);
-const storageKey = "txsentinel:xlayer-testnet:anchor-address";
 
 let artifact;
+let deployment;
 let provider;
 let account;
-let contractAddress = localStorage.getItem(storageKey) || "";
+let contractAddress = "";
 let latestReceipt;
 let busy = false;
 
@@ -115,7 +115,6 @@ function setBusy(value) {
 }
 
 function refreshControls() {
-  byId("deploy-contract").disabled = busy || !account;
   byId("register-policy").disabled = busy || !account || !contractAddress;
   byId("anchor-receipt").disabled = busy || !account || !contractAddress || !latestReceipt;
   byId("connect-wallet").disabled = busy;
@@ -133,7 +132,9 @@ function updateWalletState() {
 
 function updateContractState() {
   byId("contract-value").textContent = contractAddress ? shortHex(contractAddress) : "Not deployed";
-  byId("existing-address").value = contractAddress;
+  const link = byId("canonical-contract-link");
+  link.classList.toggle("disabled", !contractAddress);
+  if (contractAddress) link.href = explorerUrl("address", contractAddress);
   refreshControls();
 }
 
@@ -181,8 +182,8 @@ async function connectWallet() {
     account = accounts[0];
     await ensureNetwork();
     updateWalletState();
+    setActivity("Wallet connected", "X Layer Testnet is selected. Policy actions require explicit wallet confirmation.");
     await inspectContract();
-    setActivity("Wallet connected", "X Layer Testnet is selected. Deployment actions now require explicit wallet confirmation.");
   } catch (error) {
     setActivity("Wallet connection stopped", error?.message || "The wallet request was not completed.", "", true);
   } finally {
@@ -226,31 +227,6 @@ async function sendTransaction(data, label) {
   return { hash, receipt };
 }
 
-async function deployContract() {
-  setBusy(true);
-  try {
-    const previousAddress = contractAddress;
-    contractAddress = "";
-    const { hash, receipt } = await sendTransaction(artifact.bytecode, "Contract deployment");
-    contractAddress = receipt.contractAddress;
-    localStorage.setItem(storageKey, contractAddress);
-    updateContractState();
-    byId("policy-value").textContent = "Not registered";
-    setActivity("Contract deployed", `Immutable anchor deployed at ${contractAddress}.`, explorerUrl("tx", hash));
-  } catch (error) {
-    contractAddress = localStorage.getItem(storageKey) || "";
-    updateContractState();
-    setActivity("Deployment not completed", error?.message || "The deployment failed.", "", true);
-  } finally {
-    setBusy(false);
-  }
-}
-
-async function hasContractCode(address) {
-  const code = await provider.request({ method: "eth_getCode", params: [address, "latest"] });
-  return code && code !== "0x";
-}
-
 function decodePolicy(policyResult) {
   if (!policyResult || policyResult === "0x" || policyResult.length < 258) {
     return { registered: false, active: false, revision: 0n };
@@ -266,30 +242,22 @@ function decodePolicy(policyResult) {
 async function inspectContract() {
   if (!provider || !contractAddress) return;
   try {
-    if (!(await hasContractCode(contractAddress))) throw new Error("No contract bytecode exists at this address on X Layer Testnet.");
+    const code = await provider.request({ method: "eth_getCode", params: [contractAddress, "latest"] });
+    if (!code || code === "0x") throw new Error("No contract bytecode exists at the canonical X Layer address.");
+    if (code.toLowerCase() !== artifact.deployedBytecode.toLowerCase()) {
+      throw new Error("Canonical contract runtime bytecode does not match the reviewed artifact.");
+    }
     const data = encodeCall("policies(address,bytes32)", [account, artifact.defaults.policyKey]);
     const result = await provider.request({ method: "eth_call", params: [{ to: contractAddress, data }, "latest"] });
     const policy = decodePolicy(result);
     byId("policy-value").textContent = policy.registered
       ? `${policy.active ? "Active" : "Inactive"} / revision ${policy.revision}`
       : "Not registered";
-    setActivity("Contract verified", `Bytecode found at ${contractAddress}.`, explorerUrl("address", contractAddress));
+    setActivity("Canonical contract verified", `Reviewed runtime bytecode confirmed at ${contractAddress}.`, explorerUrl("address", contractAddress));
   } catch (error) {
     byId("policy-value").textContent = "Unavailable";
     setActivity("Contract check failed", error?.message || "The address could not be verified.", "", true);
   }
-}
-
-async function useExistingContract() {
-  const candidate = byId("existing-address").value.trim();
-  if (!/^0x[0-9a-fA-F]{40}$/.test(candidate)) {
-    setActivity("Invalid contract address", "Enter a 20-byte EVM contract address beginning with 0x.", "", true);
-    return;
-  }
-  contractAddress = candidate;
-  localStorage.setItem(storageKey, contractAddress);
-  updateContractState();
-  if (account) await inspectContract();
 }
 
 async function registerPolicy() {
@@ -369,7 +337,14 @@ async function anchorReceipt() {
 }
 
 async function initialize() {
-  artifact = await fetch("/contracts/TxSentinelPolicyAnchor.json").then((response) => response.json());
+  [artifact, deployment] = await Promise.all([
+    fetch("/contracts/TxSentinelPolicyAnchor.json").then((response) => response.json()),
+    fetch("/contracts/deployment.json").then((response) => response.json())
+  ]);
+  if (deployment.status !== "deployed" || !/^0x[0-9a-fA-F]{40}$/.test(deployment.contractAddress)) {
+    throw new Error("Canonical X Layer deployment metadata is unavailable.");
+  }
+  contractAddress = deployment.contractAddress;
   byId("policy-id").textContent = shortHex(artifact.defaults.policyKey, 14, 12);
   byId("policy-id").title = artifact.defaults.policyKey;
   byId("policy-hash").textContent = shortHex(artifact.defaults.policyHash, 14, 12);
@@ -395,8 +370,6 @@ async function initialize() {
 }
 
 byId("connect-wallet").addEventListener("click", connectWallet);
-byId("deploy-contract").addEventListener("click", deployContract);
-byId("use-existing").addEventListener("click", useExistingContract);
 byId("register-policy").addEventListener("click", registerPolicy);
 byId("evaluate-live").addEventListener("click", evaluateLive);
 byId("anchor-receipt").addEventListener("click", anchorReceipt);

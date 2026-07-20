@@ -85,9 +85,13 @@ The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainne
 ## X Layer Receipt Anchor
 
 The optional `TxSentinelPolicyAnchor` contract stores immutable policy-version snapshots and
-deterministic receipt hashes. Open `/onchain.html` to connect OKX Wallet, deploy to X Layer Testnet,
-register policy v1, run a live policy evaluation, and anchor its receipt. The contract cannot hold
-or transfer assets and does not receive signing authority.
+deterministic receipt hashes. Open `/onchain.html` to connect OKX Wallet, verify the canonical X
+Layer Testnet deployment, register policy v1, run a live policy evaluation, and anchor its receipt.
+The contract cannot hold or transfer assets and does not receive signing authority.
+
+- Canonical X Layer Testnet contract: [`0x295975cbec1673061d11c223b35a8513d1ebb213`](https://www.okx.com/web3/explorer/xlayer-test/address/0x295975cbec1673061d11c223b35a8513d1ebb213)
+- Deployment transaction: [`0x6604803f...741ae9`](https://www.okx.com/web3/explorer/xlayer-test/tx/0x6604803fda9b0b298ed18ea1e3e9dfc4b58b05e0f2989652f64500e8aa741ae9)
+- Runtime bytecode hash: `0xd81838ab32626c1956fe06fb9551718b0b40b16ad54079dba38612e811c3c763`
 
 ```bash
 npm run contract:compile

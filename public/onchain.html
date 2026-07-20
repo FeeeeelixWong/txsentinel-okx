@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Deploy TxSentinel's non-custodial policy and receipt anchor to X Layer Testnet with OKX Wallet."
+      content="Use TxSentinel's canonical non-custodial policy and receipt anchor on X Layer Testnet with OKX Wallet."
     />
     <title>TxSentinel | X Layer receipt anchor</title>
     <link rel="icon" href="/txsentinel-avatar.png" type="image/png" />
@@ -55,8 +55,8 @@
       <section class="deployment-console" aria-labelledby="deployment-heading">
         <div class="console-heading">
           <div>
-            <p class="section-label">DEPLOYMENT CONSOLE</p>
-            <h2 id="deployment-heading">Four signed steps to verifiable policy evidence</h2>
+            <p class="section-label">ONCHAIN CONSOLE</p>
+            <h2 id="deployment-heading">From canonical contract to verifiable policy evidence</h2>
           </div>
           <span class="endpoint-label">eip155:1952</span>
         </div>
@@ -73,14 +73,10 @@
         <div class="deployment-step">
           <div class="step-index">02</div>
           <div class="step-copy">
-            <h3>Deploy the receipt anchor</h3>
-            <p>A fixed, non-upgradeable contract with no admin, payable function, external call, or asset custody.</p>
-            <label class="existing-contract">
-              <span>Already deployed contract</span>
-              <div><input id="existing-address" placeholder="0x..." spellcheck="false" /><button id="use-existing" type="button">Use address</button></div>
-            </label>
+            <h3>Verify the canonical receipt anchor</h3>
+            <p>The fixed, non-upgradeable contract has no admin, payable function, external call, or asset custody.</p>
           </div>
-          <button id="deploy-contract" class="step-command" type="button" disabled>Deploy contract</button>
+          <a id="canonical-contract-link" class="step-command secondary command-link" target="_blank" rel="noreferrer">View contract</a>
         </div>
 
         <div class="deployment-step">
@@ -116,7 +112,7 @@
         <div>
           <p class="section-label">ACTIVITY</p>
           <strong id="activity-title">Ready for wallet connection</strong>
-          <p id="activity-detail">Use OKX Wallet to deploy on X Layer Testnet.</p>
+          <p id="activity-detail">Connect OKX Wallet to verify the canonical contract and register your policy.</p>
         </div>
         <a id="activity-link" class="hidden" target="_blank" rel="noreferrer">View on explorer</a>
       </section>

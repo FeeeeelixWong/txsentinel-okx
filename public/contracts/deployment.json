@@ -1,7 +1,10 @@
 {
   "network": "X Layer Testnet",
   "chainId": 1952,
-  "status": "awaiting_wallet_deployment",
-  "contractAddress": null,
-  "deploymentTransaction": null
+  "status": "deployed",
+  "contractAddress": "0x295975cbec1673061d11c223b35a8513d1ebb213",
+  "deploymentTransaction": "0x6604803fda9b0b298ed18ea1e3e9dfc4b58b05e0f2989652f64500e8aa741ae9",
+  "deploymentBlock": 36098267,
+  "deployer": "0x0934146ca4f8e611da0ef8bd295ee9f7e34741fe",
+  "runtimeBytecodeHash": "0xd81838ab32626c1956fe06fb9551718b0b40b16ad54079dba38612e811c3c763"
 }
