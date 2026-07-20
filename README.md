@@ -1,33 +1,48 @@
-# TxSentinel
+# 🛡️ TxSentinel
 
-TxSentinel is a deterministic transaction policy firewall for autonomous agents. Before an agent signs an onchain action, TxSentinel evaluates its intent, policy limits, and supplied simulation evidence, then returns an explainable `ALLOW`, `HOLD`, or `DENY` receipt.
+> A deterministic transaction policy firewall for autonomous agents.
 
-- Live product: [txsentinel-okx.vercel.app](https://txsentinel-okx.vercel.app)
-- Policy evaluator: [txsentinel-okx.vercel.app/evaluate.html](https://txsentinel-okx.vercel.app/evaluate.html)
-- Free review API: [txsentinel-okx.vercel.app/api/check](https://txsentinel-okx.vercel.app/api/check)
-- X Layer onchain console: [txsentinel-okx.vercel.app/onchain.html](https://txsentinel-okx.vercel.app/onchain.html)
-- Agent integration guide: [txsentinel-okx.vercel.app/integrate.html](https://txsentinel-okx.vercel.app/integrate.html)
-- ASP candidate: `TxSentinel #6828`, listing review submitted
-- Hackathon: OKX.AI Genesis Hackathon
+Before an agent signs an onchain action, TxSentinel evaluates its intent, policy limits, and supplied
+simulation evidence. It then returns an explainable `ALLOW`, `HOLD`, or `DENY` receipt without taking
+custody, signing transactions, or broadcasting them.
 
-**Start here:** [Visual product guide](docs/VISUAL_GUIDE.md) · [Architecture](ARCHITECTURE.md) · [API contract](docs/API.md)
+## 🔗 Quick Links
 
-## Product in One Picture
+| Experience | Link | Purpose |
+| --- | --- | --- |
+| 🚀 Live product | [Open TxSentinel](https://txsentinel-okx.vercel.app) | Product overview and guided workflow |
+| 🧪 Policy evaluator | [Evaluate an action](https://txsentinel-okx.vercel.app/evaluate.html) | Test `ALLOW`, `HOLD`, and `DENY` decisions |
+| ⛓️ Onchain console | [Verify on X Layer](https://txsentinel-okx.vercel.app/onchain.html) | Register a policy and anchor a receipt |
+| 🔌 Integration guide | [Integrate an agent](https://txsentinel-okx.vercel.app/integrate.html) | Connect an agent or wallet workflow |
+| 📡 Free review API | [`POST /api/check`](https://txsentinel-okx.vercel.app/api/check) | Deterministic public evaluation endpoint |
+
+**Project status:** ASP candidate `TxSentinel #6828` · Listing review submitted<br>
+**Built for:** OKX.AI Genesis Hackathon
+
+## 📚 Documentation
+
+- [Visual product guide](docs/VISUAL_GUIDE.md)
+- [Architecture and trust boundaries](ARCHITECTURE.md)
+- [API contract](docs/API.md)
+- [Policy FAQ](#policy-faq)
+
+## 🗺️ Product in One Picture
 
 ![TxSentinel product flow](docs/assets/product-overview.svg)
 
-TxSentinel runs **after an action is constructed but before it is signed**. The policy decision is
-made offchain for speed and explainability. A wallet can then anchor the receipt to X Layer for
-independent evidence without giving the contract custody or execution authority.
+1. An agent constructs an action.
+2. TxSentinel evaluates the action **before it is signed**.
+3. The policy engine returns `ALLOW`, `HOLD`, or `DENY` with deterministic evidence.
+4. The wallet may anchor the receipt to X Layer without giving the contract custody or execution authority.
 
-## What Is Onchain?
+## ⛓️ What Is Onchain?
 
 ![TxSentinel onchain sequence](docs/assets/onchain-sequence.svg)
 
 `registerPolicy` does not approve tokens or move funds. It binds a wallet to a policy hash and
 revision. `anchorReceipt` stores evidence of a decision; it does not execute the underlying action.
 
-## Why It Exists
+## 🎯 Why It Exists
 
 Agent wallets make autonomous actions possible, but autonomy without a pre-sign policy boundary is unsafe. Most transaction simulators answer whether a transaction *can* execute. TxSentinel answers whether the agent *should* execute it under a specific mandate.
 
@@ -38,7 +53,7 @@ Every decision contains:
 - an action digest and SHA-256 receipt hash
 - no private keys, signing authority, or broadcast capability
 
-## Try It
+## ⚡ Try It
 
 ```bash
 curl -sS https://txsentinel-okx.vercel.app/api/check \
@@ -55,7 +70,7 @@ curl -sS https://txsentinel-okx.vercel.app/api/check \
 
 The endpoint also accepts an empty POST and evaluates a documented review sample, so marketplace reviewers can verify availability immediately.
 
-## Decision Model
+## 🚦 Decision Model
 
 | Decision | Meaning | Representative rules |
 | --- | --- | --- |
@@ -65,7 +80,7 @@ The endpoint also accepts an empty POST and evaluates a documented review sample
 
 Supported chains are X Layer, Ethereum, Base, and Solana. Supported operations are transfer, swap, token approval, and contract call.
 
-## Policy Ownership
+## 👤 Policy Ownership
 
 | Layer | Controlled by | Examples |
 | --- | --- | --- |
@@ -76,7 +91,7 @@ Supported chains are X Layer, Ethereum, Base, and Solana. Supported operations a
 The current onchain demo registers a reviewed canonical Policy v1. A later policy update increments
 the revision; receipts already anchored against an older revision do not change.
 
-## OKX Integration
+## 🔌 OKX Integration
 
 TxSentinel uses two deliberately isolated surfaces:
 
@@ -87,7 +102,7 @@ When activated, an unpaid request receives HTTP `402` with `PAYMENT-REQUIRED`. A
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the exact trust boundary and [docs/API.md](docs/API.md) for the request contract.
 
-## Local Development
+## 🧑‍💻 Local Development
 
 ```bash
 npm install
@@ -99,7 +114,7 @@ npm run smoke
 
 The test suite covers policy boundaries, normalization, receipt determinism, input rejection, and HTTP behavior. The smoke suite exercises all three decisions against a running deployment and verifies the x402 readiness state.
 
-## Official x402 Activation
+## 💳 Official x402 Activation
 
 ```bash
 cp .env.example .env.local
@@ -112,7 +127,7 @@ npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 
 The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainnet (`eip155:196`) only after end-to-end testnet settlement evidence exists.
 
-## X Layer Receipt Anchor
+## 🔗 X Layer Receipt Anchor
 
 The optional `TxSentinelPolicyAnchor` contract stores immutable policy-version snapshots and
 deterministic receipt hashes. Open `/onchain.html` to connect OKX Wallet, verify the canonical X
@@ -129,18 +144,20 @@ npm run contract:lint
 npm run contract:test
 ```
 
-## Policy FAQ
+<a id="policy-faq"></a>
 
-### Can one wallet own multiple policies?
+## ❓ Policy FAQ
 
-Yes. Policies are stored under `(owner address, policyKey)`, so one wallet can register multiple
+### 1. Can one wallet own multiple policies?
+
+**Yes.** Policies are stored under `(owner address, policyKey)`, so one wallet can register multiple
 independent policies by using different policy keys. Each policy has its own ruleset hash, version,
 revision, active status, delegates, and receipt history. Different wallets may also reuse the same
 application-defined policy key because each owner's namespace is isolated.
 
-### Can a policy be updated?
+### 2. Can a policy be updated?
 
-Yes. The policy owner can call `updatePolicy` with a replacement policy hash and version hash. The
+**Yes.** The policy owner can call `updatePolicy` with a replacement policy hash and version hash. The
 contract increments the policy revision on every update. Updating an inactive policy does not
 automatically reactivate it.
 
@@ -148,34 +165,34 @@ Previously anchored receipts remain unchanged after an update. Every receipt sto
 hash, version hash, and revision that were active when that decision was anchored, preserving an
 auditable historical snapshot.
 
-### Who can update or disable a policy?
+### 3. Who can update or disable a policy?
 
 Only the wallet that owns the policy can update it, change its active status, or manage delegates.
 A policy-scoped delegate may anchor receipts for that policy but cannot change its rules or status.
 
-### Does a policy expire automatically?
+### 4. Does a policy expire automatically?
 
-No. The current contract has no automatic expiration timestamp. A registered policy remains active
+**No.** The current contract has no automatic expiration timestamp. A registered policy remains active
 until its owner calls `setPolicyActive(policyKey, false)`. The owner may later reactivate it with
 `setPolicyActive(policyKey, true)`.
 
-### Can a policy be deleted or registered again under the same key?
+### 5. Can a policy be deleted or registered again under the same key?
 
-No. Onchain policy records are not deleted, and an existing `(owner, policyKey)` cannot be registered
+**No.** Onchain policy records are not deleted, and an existing `(owner, policyKey)` cannot be registered
 again. The owner should update the existing policy, deactivate it, or register a new policy under a
 different key. This prevents historical receipts from losing their policy identity.
 
-### Does the current web console expose all of these controls?
+### 6. Does the current web console expose all of these controls?
 
-Not yet. The deployed contract supports multiple policies, updates, activation controls, and
+**Not yet.** The deployed contract supports multiple policies, updates, activation controls, and
 policy-scoped delegates. The current hackathon console intentionally presents one reviewed canonical
 Policy v1 so the end-to-end registration and receipt flow stays easy to verify.
 
-## Security
+## 🔒 Security
 
 TxSentinel is read-only. It rejects unknown top-level and policy fields, caps request size on the paid endpoint, never accepts a private key field, and cannot sign or broadcast transactions. Supplied simulation evidence is labeled as evidence, not represented as an RPC simulation performed by TxSentinel.
 
-## Repository Map
+## 🗂️ Repository Map
 
 ```text
 api/check.js          Free deterministic policy endpoint
@@ -187,9 +204,9 @@ scripts/smoke.mjs     Deployment smoke suite
 test/                 Policy and HTTP contract tests
 ```
 
-## Status
+## ✅ Status
 
-- Live policy product and public API: complete
-- ASP `#6828` activation and listing review: submitted
-- Official x402 server integration: implemented
-- Real x402 settlement: pending deployment credentials and funded testnet payer evidence
+- ✅ Live policy product and public API: complete
+- ✅ ASP `#6828` activation and listing review: submitted
+- ✅ Official x402 server integration: implemented
+- ⏳ Real x402 settlement: pending deployment credentials and funded testnet payer evidence
