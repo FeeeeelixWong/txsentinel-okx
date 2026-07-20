@@ -1,0 +1,550 @@
+{
+  "contractName": "TxSentinelPolicyAnchor",
+  "sourceName": "contracts/TxSentinelPolicyAnchor.sol",
+  "compilerVersion": "0.8.30+commit.73712a01.Emscripten.clang",
+  "evmVersion": "paris",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "InvalidValue",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PolicyAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PolicyInactive",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PolicyNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReceiptAlreadyAnchored",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "allowed",
+          "type": "bool"
+        }
+      ],
+      "name": "DelegateSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "PolicyRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "PolicyStatusChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "PolicyUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "receiptHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "submitter",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "actionDigest",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "policyRevision",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum TxSentinelPolicyAnchor.Decision",
+          "name": "decision",
+          "type": "uint8"
+        }
+      ],
+      "name": "ReceiptAnchored",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "receiptHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "policyOwner",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionDigest",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum TxSentinelPolicyAnchor.Decision",
+          "name": "decision",
+          "type": "uint8"
+        }
+      ],
+      "name": "anchorReceipt",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        }
+      ],
+      "name": "delegates",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "allowed",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "policyOwner",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        }
+      ],
+      "name": "isAuthorized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "policies",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "receiptHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "receipts",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionDigest",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "submitter",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "policyRevision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "anchoredAt",
+          "type": "uint64"
+        },
+        {
+          "internalType": "enum TxSentinelPolicyAnchor.Decision",
+          "name": "decision",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerPolicy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "allowed",
+          "type": "bool"
+        }
+      ],
+      "name": "setDelegate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "setPolicyActive",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "versionHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "updatePolicy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50610c0d8061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100935760003560e01c80636906816c116100665780636906816c1461011c578063c74d8c05146101a7578063e8f180b7146101ba578063efad585614610237578063f57a044a1461024a57600080fd5b80630d44625b146100985780633099d187146100e1578063579196cf146100f657806364f84b4814610109575b600080fd5b6100cc6100a6366004610970565b600160209081526000938452604080852082529284528284209052825290205460ff1681565b60405190151581526020015b60405180910390f35b6100f46100ef3660046109ac565b61025d565b005b6100f46101043660046109e8565b610387565b6100f46101173660046109ac565b6103ec565b61019461012a366004610a14565b60026020818152600094855260408086208252938552838520905290835291208054600182015492820154600383015460049093015491939290916001600160a01b03821691600160a01b90046001600160401b039081169190811690600160401b900460ff1687565b6040516100d89796959493929190610a7f565b6100f46101b5366004610ad3565b6104b4565b6102066101c8366004610b06565b60006020818152928152604080822090935290815220805460018201546002909201549091906001600160401b03811690600160401b900460ff1684565b6040516100d8949392919093845260208401929092526001600160401b031660408301521515606082015260800190565b6100f4610245366004610b30565b610572565b6100cc610258366004610970565b610866565b821580610268575081155b80610271575080155b1561028f57604051632a9ffab760e21b815260040160405180910390fd5b336000908152602081815260408083208684529091529020600201546001600160401b0316156102d2576040516342693d1160e11b815260040160405180910390fd5b6040805160808101825283815260208082018481526001838501818152606085018281523360008181528087528881208c8252875288902096518755935192860192909255516002909401805491511515600160401b0268ffffffffffffffffff199092166001600160401b039095169490941717909255825185815290810184905285927f15eb0660597eb55f4561783b43de1aadfeb3f66913384896a997a68b0639b78d910160405180910390a3505050565b60006103928361090b565b60028101805468ff00000000000000001916600160401b8515159081029190911790915560405191925090849033907f0e982bd59c0067154bc186762c1f25ada4d4af3e6acde94085dba1c6bb09f46290600090a4505050565b60006103f78461090b565b9050821580610404575081155b1561042257604051632a9ffab760e21b815260040160405180910390fd5b82815560018101829055600281018054600090610447906001600160401b0316610b88565b82546101009290920a6001600160401b03818102199093169183160217909155600282015460408051868152602081018690529190921691869133917f842eeca7685de5179274ba624f424d4e503a1105e9ca92ab15ca3cd4a5823203910160405180910390a450505050565b6104bd8361090b565b506001600160a01b03821615806104dc57506001600160a01b03821633145b156104fa57604051632a9ffab760e21b815260040160405180910390fd5b33600081815260016020908152604080832087845282528083206001600160a01b03871680855290835292819020805460ff191686151590811790915590519081529192869290917f6b0982fc070a5f1fd5568f1ce3804ec781d29c99e6d1addcdfc71655e479d176910160405180910390a4505050565b84158061057d575081155b1561059b57604051632a9ffab760e21b815260040160405180910390fd5b6001600160a01b038481166000908152600260209081526040808320878452825280832089845290915290206003015416156105ea5760405163060dad5d60e51b815260040160405180910390fd5b6001600160a01b0384166000908152602081815260408083208684529091528120600281015490916001600160401b03909116900361063c5760405163720caa4f60e01b815260040160405180910390fd5b6002810154600160401b900460ff1661066857604051631ea4813d60e21b815260040160405180910390fd5b336001600160a01b038616148015906106ad57506001600160a01b0385166000908152600160209081526040808320878452825280832033845290915290205460ff16155b156106ca576040516282b42960e81b815260040160405180910390fd5b6040805160e081018252848152825460208201526001830154918101919091523360608201526002808301546001600160401b039081166080840152421660a083015260c0820190849081111561072357610723610a47565b90526001600160a01b0380871660009081526002602081815260408084208a855282528084208c8552825292839020855181559085015160018201559184015182820155606084015160038301805460808701516001600160401b03908116600160a01b026001600160e01b0319909216939096169290921791909117905560a08401516004830180549190941667ffffffffffffffff1982168117855560c086015193949268ffffffffffffffffff199092161790600160401b9084908111156107f0576107f0610a47565b0217905550508154600183015460028401546040518a945088936001600160a01b038b16937f53434b271911def50a23d76c8c35aaa703370d8f096d8c1c905820ae22b0f37a936108569333938c93909290916001600160401b03909116908c90610bc1565b60405180910390a4505050505050565b6001600160a01b038316600090815260208181526040808320858452909152812060028101546001600160401b0316158015906108ae57506002810154600160401b900460ff165b80156109025750846001600160a01b0316836001600160a01b0316148061090257506001600160a01b03808616600090815260016020908152604080832088845282528083209387168352929052205460ff165b95945050505050565b336000908152602081815260408083208484529091528120600281015490916001600160401b0390911690036109545760405163720caa4f60e01b815260040160405180910390fd5b919050565b80356001600160a01b038116811461095457600080fd5b60008060006060848603121561098557600080fd5b61098e84610959565b9250602084013591506109a360408501610959565b90509250925092565b6000806000606084860312156109c157600080fd5b505081359360208301359350604090920135919050565b8035801515811461095457600080fd5b600080604083850312156109fb57600080fd5b82359150610a0b602084016109d8565b90509250929050565b600080600060608486031215610a2957600080fd5b610a3284610959565b95602085013595506040909401359392505050565b634e487b7160e01b600052602160045260246000fd5b60038110610a7b57634e487b7160e01b600052602160045260246000fd5b9052565b87815260208101879052604081018690526001600160a01b03851660608201526001600160401b038481166080830152831660a082015260e08101610ac760c0830184610a5d565b98975050505050505050565b600080600060608486031215610ae857600080fd5b83359250610af860208501610959565b91506109a3604085016109d8565b60008060408385031215610b1957600080fd5b610b2283610959565b946020939093013593505050565b600080600080600060a08688031215610b4857600080fd5b85359450610b5860208701610959565b93506040860135925060608601359150608086013560038110610b7a57600080fd5b809150509295509295909350565b60006001600160401b0382166001600160401b038103610bb857634e487b7160e01b600052601160045260246000fd5b60010192915050565b6001600160a01b03871681526020810186905260408101859052606081018490526001600160401b038316608082015260c08101610c0260a0830184610a5d565b97965050505050505056",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100935760003560e01c80636906816c116100665780636906816c1461011c578063c74d8c05146101a7578063e8f180b7146101ba578063efad585614610237578063f57a044a1461024a57600080fd5b80630d44625b146100985780633099d187146100e1578063579196cf146100f657806364f84b4814610109575b600080fd5b6100cc6100a6366004610970565b600160209081526000938452604080852082529284528284209052825290205460ff1681565b60405190151581526020015b60405180910390f35b6100f46100ef3660046109ac565b61025d565b005b6100f46101043660046109e8565b610387565b6100f46101173660046109ac565b6103ec565b61019461012a366004610a14565b60026020818152600094855260408086208252938552838520905290835291208054600182015492820154600383015460049093015491939290916001600160a01b03821691600160a01b90046001600160401b039081169190811690600160401b900460ff1687565b6040516100d89796959493929190610a7f565b6100f46101b5366004610ad3565b6104b4565b6102066101c8366004610b06565b60006020818152928152604080822090935290815220805460018201546002909201549091906001600160401b03811690600160401b900460ff1684565b6040516100d8949392919093845260208401929092526001600160401b031660408301521515606082015260800190565b6100f4610245366004610b30565b610572565b6100cc610258366004610970565b610866565b821580610268575081155b80610271575080155b1561028f57604051632a9ffab760e21b815260040160405180910390fd5b336000908152602081815260408083208684529091529020600201546001600160401b0316156102d2576040516342693d1160e11b815260040160405180910390fd5b6040805160808101825283815260208082018481526001838501818152606085018281523360008181528087528881208c8252875288902096518755935192860192909255516002909401805491511515600160401b0268ffffffffffffffffff199092166001600160401b039095169490941717909255825185815290810184905285927f15eb0660597eb55f4561783b43de1aadfeb3f66913384896a997a68b0639b78d910160405180910390a3505050565b60006103928361090b565b60028101805468ff00000000000000001916600160401b8515159081029190911790915560405191925090849033907f0e982bd59c0067154bc186762c1f25ada4d4af3e6acde94085dba1c6bb09f46290600090a4505050565b60006103f78461090b565b9050821580610404575081155b1561042257604051632a9ffab760e21b815260040160405180910390fd5b82815560018101829055600281018054600090610447906001600160401b0316610b88565b82546101009290920a6001600160401b03818102199093169183160217909155600282015460408051868152602081018690529190921691869133917f842eeca7685de5179274ba624f424d4e503a1105e9ca92ab15ca3cd4a5823203910160405180910390a450505050565b6104bd8361090b565b506001600160a01b03821615806104dc57506001600160a01b03821633145b156104fa57604051632a9ffab760e21b815260040160405180910390fd5b33600081815260016020908152604080832087845282528083206001600160a01b03871680855290835292819020805460ff191686151590811790915590519081529192869290917f6b0982fc070a5f1fd5568f1ce3804ec781d29c99e6d1addcdfc71655e479d176910160405180910390a4505050565b84158061057d575081155b1561059b57604051632a9ffab760e21b815260040160405180910390fd5b6001600160a01b038481166000908152600260209081526040808320878452825280832089845290915290206003015416156105ea5760405163060dad5d60e51b815260040160405180910390fd5b6001600160a01b0384166000908152602081815260408083208684529091528120600281015490916001600160401b03909116900361063c5760405163720caa4f60e01b815260040160405180910390fd5b6002810154600160401b900460ff1661066857604051631ea4813d60e21b815260040160405180910390fd5b336001600160a01b038616148015906106ad57506001600160a01b0385166000908152600160209081526040808320878452825280832033845290915290205460ff16155b156106ca576040516282b42960e81b815260040160405180910390fd5b6040805160e081018252848152825460208201526001830154918101919091523360608201526002808301546001600160401b039081166080840152421660a083015260c0820190849081111561072357610723610a47565b90526001600160a01b0380871660009081526002602081815260408084208a855282528084208c8552825292839020855181559085015160018201559184015182820155606084015160038301805460808701516001600160401b03908116600160a01b026001600160e01b0319909216939096169290921791909117905560a08401516004830180549190941667ffffffffffffffff1982168117855560c086015193949268ffffffffffffffffff199092161790600160401b9084908111156107f0576107f0610a47565b0217905550508154600183015460028401546040518a945088936001600160a01b038b16937f53434b271911def50a23d76c8c35aaa703370d8f096d8c1c905820ae22b0f37a936108569333938c93909290916001600160401b03909116908c90610bc1565b60405180910390a4505050505050565b6001600160a01b038316600090815260208181526040808320858452909152812060028101546001600160401b0316158015906108ae57506002810154600160401b900460ff165b80156109025750846001600160a01b0316836001600160a01b0316148061090257506001600160a01b03808616600090815260016020908152604080832088845282528083209387168352929052205460ff165b95945050505050565b336000908152602081815260408083208484529091528120600281015490916001600160401b0390911690036109545760405163720caa4f60e01b815260040160405180910390fd5b919050565b80356001600160a01b038116811461095457600080fd5b60008060006060848603121561098557600080fd5b61098e84610959565b9250602084013591506109a360408501610959565b90509250925092565b6000806000606084860312156109c157600080fd5b505081359360208301359350604090920135919050565b8035801515811461095457600080fd5b600080604083850312156109fb57600080fd5b82359150610a0b602084016109d8565b90509250929050565b600080600060608486031215610a2957600080fd5b610a3284610959565b95602085013595506040909401359392505050565b634e487b7160e01b600052602160045260246000fd5b60038110610a7b57634e487b7160e01b600052602160045260246000fd5b9052565b87815260208101879052604081018690526001600160a01b03851660608201526001600160401b038481166080830152831660a082015260e08101610ac760c0830184610a5d565b98975050505050505050565b600080600060608486031215610ae857600080fd5b83359250610af860208501610959565b91506109a3604085016109d8565b60008060408385031215610b1957600080fd5b610b2283610959565b946020939093013593505050565b600080600080600060a08688031215610b4857600080fd5b85359450610b5860208701610959565b93506040860135925060608601359150608086013560038110610b7a57600080fd5b809150509295509295909350565b60006001600160401b0382166001600160401b038103610bb857634e487b7160e01b600052601160045260246000fd5b60010192915050565b6001600160a01b03871681526020810186905260408101859052606081018490526001600160401b038316608082015260c08101610c0260a0830184610a5d565b97965050505050505056",
+  "methodIdentifiers": {
+    "anchorReceipt(bytes32,address,bytes32,bytes32,uint8)": "efad5856",
+    "delegates(address,bytes32,address)": "0d44625b",
+    "isAuthorized(address,bytes32,address)": "f57a044a",
+    "policies(address,bytes32)": "e8f180b7",
+    "receipts(address,bytes32,bytes32)": "6906816c",
+    "registerPolicy(bytes32,bytes32,bytes32)": "3099d187",
+    "setDelegate(bytes32,address,bool)": "c74d8c05",
+    "setPolicyActive(bytes32,bool)": "579196cf",
+    "updatePolicy(bytes32,bytes32,bytes32)": "64f84b48"
+  },
+  "security": {
+    "forbiddenRuntimeOpcodes": [
+      "CALL",
+      "CALLCODE",
+      "DELEGATECALL",
+      "STATICCALL",
+      "SELFDESTRUCT",
+      "CREATE",
+      "CREATE2"
+    ],
+    "detectedForbiddenRuntimeOpcodes": []
+  },
+  "network": {
+    "name": "X Layer Testnet",
+    "chainId": 1952,
+    "chainIdHex": "0x7a0",
+    "rpcUrls": [
+      "https://testrpc.xlayer.tech/terigon",
+      "https://xlayertestrpc.okx.com/terigon"
+    ],
+    "blockExplorerUrl": "https://www.okx.com/web3/explorer/xlayer-test"
+  },
+  "defaults": {
+    "policyKey": "0x52c49e9a675e5a8a105bdc4c748d4453f7cd95e6d52a2e02d023935b771fe047",
+    "policyHash": "0x1d20f9da760a78ceee427dcf397eac955e950a171b2c49df9345aa4544d14c53",
+    "policyHashAlgorithm": "keccak256(utf8(canonicalPolicyJson))",
+    "versionHash": "0x5aee263d51f594f98ba0968f437c59bdd1f7032c7d6833a7e22e5aaaef25e51e",
+    "policy": {
+      "maxSpendUsd": 100,
+      "allowlistedRecipients": [],
+      "denyUnlimitedApprovals": true,
+      "requireSimulation": true,
+      "requireVerifiedContract": false,
+      "maxSlippageBps": 100,
+      "maxFeeUsd": 5
+    },
+    "canonicalPolicy": "{\"maxSpendUsd\":100,\"allowlistedRecipients\":[],\"denyUnlimitedApprovals\":true,\"requireSimulation\":true,\"requireVerifiedContract\":false,\"maxSlippageBps\":100,\"maxFeeUsd\":5}"
+  }
+}

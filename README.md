@@ -4,6 +4,7 @@ TxSentinel is a deterministic transaction policy firewall for autonomous agents.
 
 - Live product: [txsentinel-okx.vercel.app](https://txsentinel-okx.vercel.app)
 - Free review API: [txsentinel-okx.vercel.app/api/check](https://txsentinel-okx.vercel.app/api/check)
+- X Layer deployment console: [txsentinel-okx.vercel.app/onchain.html](https://txsentinel-okx.vercel.app/onchain.html)
 - ASP candidate: `TxSentinel #6828`, listing review submitted
 - Hackathon: OKX.AI Genesis Hackathon
 
@@ -81,6 +82,19 @@ npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 
 The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainnet (`eip155:196`) only after end-to-end testnet settlement evidence exists.
 
+## X Layer Receipt Anchor
+
+The optional `TxSentinelPolicyAnchor` contract stores immutable policy-version snapshots and
+deterministic receipt hashes. Open `/onchain.html` to connect OKX Wallet, deploy to X Layer Testnet,
+register policy v1, run a live policy evaluation, and anchor its receipt. The contract cannot hold
+or transfer assets and does not receive signing authority.
+
+```bash
+npm run contract:compile
+npm run contract:lint
+npm run contract:test
+```
+
 ## Security
 
 TxSentinel is read-only. It rejects unknown top-level and policy fields, caps request size on the paid endpoint, never accepts a private key field, and cannot sign or broadcast transactions. Supplied simulation evidence is labeled as evidence, not represented as an RPC simulation performed by TxSentinel.
@@ -92,6 +106,7 @@ api/check.js          Free deterministic policy endpoint
 api/check-paid.js     Official OKX x402 protected endpoint
 lib/policy.js         Pure policy and receipt engine
 public/               Interactive product console
+contracts/            Non-custodial X Layer policy receipt anchor
 scripts/smoke.mjs     Deployment smoke suite
 test/                 Policy and HTTP contract tests
 ```
