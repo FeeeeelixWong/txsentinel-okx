@@ -56,7 +56,11 @@ const scenarios = {
 const byId = (id) => document.getElementById(id);
 const form = byId("policy-form");
 const evaluateButton = byId("evaluate");
+const previousButton = byId("previous-step");
+const nextButton = byId("next-step");
 let latestResponse = null;
+let currentStep = 1;
+let maxStepReached = 1;
 
 function setValue(id, value) {
   const element = byId(id);
@@ -87,8 +91,11 @@ function loadScenario(name) {
   document.querySelectorAll(".scenario-tab").forEach((tab) => {
     const active = tab.dataset.scenario === name;
     tab.classList.toggle("active", active);
-    tab.setAttribute("aria-selected", String(active));
+    tab.setAttribute("aria-pressed", String(active));
   });
+
+  resetReceipt();
+  showStep(1);
 }
 
 function updateOperationFields() {
@@ -136,6 +143,59 @@ function shortHash(hash) {
   return hash ? `${hash.slice(0, 12)}...${hash.slice(-10)}` : "-";
 }
 
+function resetReceipt() {
+  latestResponse = null;
+  byId("empty-receipt").classList.remove("hidden");
+  byId("receipt-content").classList.add("hidden");
+  byId("error-panel").classList.add("hidden");
+  const badge = byId("decision-badge");
+  badge.textContent = "READY";
+  badge.className = "decision-badge idle";
+  evaluateButton.querySelector("span").textContent = "Evaluate transaction";
+}
+
+function updateReview() {
+  const operation = byId("operation").selectedOptions[0]?.textContent || byId("operation").value;
+  const chain = byId("chain").selectedOptions[0]?.textContent || byId("chain").value;
+  byId("review-action").textContent = `${operation} on ${chain} · $${numberValue("amount").toLocaleString()}`;
+  byId("review-to").textContent = byId("to").value.trim() || "Not set";
+  byId("review-to").title = byId("to").value.trim();
+  byId("review-cap").textContent = `$${numberValue("max-spend").toLocaleString()} spend · $${numberValue("max-fee").toLocaleString()} fee`;
+  byId("review-evidence").textContent = `${byId("simulation-status").selectedOptions[0]?.textContent || "Not set"} · ${byId("contract-verified").checked ? "verified contract" : "unverified contract"}`;
+}
+
+function showStep(step) {
+  currentStep = Math.min(4, Math.max(1, step));
+  maxStepReached = Math.max(maxStepReached, currentStep);
+
+  document.querySelectorAll(".wizard-panel").forEach((panel) => {
+    panel.classList.toggle("active", Number(panel.dataset.panel) === currentStep);
+  });
+  document.querySelectorAll(".wizard-step").forEach((button) => {
+    const buttonStep = Number(button.dataset.step);
+    button.disabled = buttonStep > maxStepReached;
+    button.classList.toggle("active", buttonStep === currentStep);
+    button.classList.toggle("complete", buttonStep < currentStep || buttonStep < maxStepReached);
+    if (buttonStep === currentStep) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+  });
+
+  previousButton.disabled = currentStep === 1;
+  nextButton.classList.toggle("hidden", currentStep === 4);
+  evaluateButton.classList.toggle("hidden", currentStep !== 4);
+  byId("step-position").textContent = `Step ${currentStep} of 4`;
+  if (currentStep === 4) updateReview();
+}
+
+function canAdvance() {
+  if (currentStep !== 1) return true;
+  const recipient = byId("to");
+  if (!recipient.value.trim()) recipient.setCustomValidity("Enter a recipient or contract address.");
+  else recipient.setCustomValidity("");
+  if (!recipient.reportValidity()) return false;
+  return byId("amount").reportValidity();
+}
+
 function renderReceipt(response) {
   latestResponse = response;
   const result = response.result;
@@ -157,6 +217,7 @@ function renderReceipt(response) {
   byId("receipt-hash").title = result.receiptHash;
   byId("evaluated-at").textContent = new Date(response.evaluatedAt).toLocaleTimeString();
   byId("raw-response").textContent = JSON.stringify(response, null, 2);
+  evaluateButton.querySelector("span").textContent = "Re-evaluate transaction";
 
   const reasonList = byId("reason-list");
   reasonList.replaceChildren();
@@ -191,6 +252,7 @@ function renderError(message) {
 async function evaluate(event) {
   event.preventDefault();
   evaluateButton.disabled = true;
+  evaluateButton.setAttribute("aria-busy", "true");
   evaluateButton.querySelector("span").textContent = "Evaluating policy...";
 
   try {
@@ -206,7 +268,8 @@ async function evaluate(event) {
     renderError(error instanceof Error ? error.message : "The evaluation could not be completed.");
   } finally {
     evaluateButton.disabled = false;
-    evaluateButton.querySelector("span").textContent = "Evaluate transaction";
+    evaluateButton.removeAttribute("aria-busy");
+    evaluateButton.querySelector("span").textContent = latestResponse ? "Re-evaluate transaction" : "Evaluate transaction";
   }
 }
 
@@ -228,34 +291,23 @@ function downloadReceipt() {
   URL.revokeObjectURL(url);
 }
 
-async function checkServices() {
-  try {
-    const api = await fetch("/api/health");
-    if (!api.ok) throw new Error("offline");
-    byId("api-status").innerHTML = "<i></i>API live";
-  } catch {
-    byId("api-status").classList.add("warn");
-    byId("api-status").innerHTML = "<i></i>API unavailable";
-  }
-
-  try {
-    const response = await fetch("/api/check-paid");
-    const body = await response.json();
-    const ready = body.status === "ready";
-    byId("x402-status").className = `status-chip ${ready ? "" : "warn"}`;
-    byId("x402-status").innerHTML = `<i></i>x402 ${ready ? "ready" : "staged"}`;
-  } catch {
-    byId("x402-status").className = "status-chip muted";
-    byId("x402-status").innerHTML = "<i></i>x402 unavailable";
-  }
-}
-
 document.querySelectorAll(".scenario-tab").forEach((tab) => {
   tab.addEventListener("click", () => loadScenario(tab.dataset.scenario));
 });
 byId("operation").addEventListener("change", updateOperationFields);
 form.addEventListener("submit", evaluate);
+form.addEventListener("input", () => {
+  if (currentStep === 4) updateReview();
+  if (latestResponse) resetReceipt();
+});
+nextButton.addEventListener("click", () => {
+  if (canAdvance()) showStep(currentStep + 1);
+});
+previousButton.addEventListener("click", () => showStep(currentStep - 1));
+document.querySelectorAll(".wizard-step").forEach((button) => {
+  button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+});
 byId("copy-receipt").addEventListener("click", copyReceipt);
 byId("download-receipt").addEventListener("click", downloadReceipt);
 loadScenario("safe");
-checkServices();
+showStep(1);

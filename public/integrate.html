@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Integrate autonomous agents with the TxSentinel free policy API or official OKX x402 endpoint." />
+    <title>TxSentinel | Integrate</title>
+    <link rel="icon" href="/txsentinel-avatar.png" type="image/png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="TxSentinel overview"><img src="/txsentinel-avatar.png" alt="" width="40" height="40" /><span><strong>TxSentinel</strong><small>Agent transaction control</small></span></a>
+        <nav class="primary-nav" aria-label="Primary navigation"><a href="/">Overview</a><a href="/evaluate.html">Evaluate</a><a href="/onchain.html">Onchain</a><a class="active" href="/integrate.html" aria-current="page">Integrate</a></nav>
+        <div class="service-status" aria-label="Service status"><span id="api-status" class="status-chip muted"><i></i>API checking</span><span id="x402-status" class="status-chip muted"><i></i>x402 checking</span></div>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="page-heading compact-heading">
+        <div><p class="eyebrow">AGENT INTEGRATION</p><h1>Put policy checks in the execution path</h1><p>Choose the public review API for prototyping or the official OKX x402 endpoint for metered agent access.</p></div>
+        <a class="secondary-link" href="https://github.com/FeeeeelixWong/txsentinel-okx#api" target="_blank" rel="noreferrer">Open technical docs</a>
+      </section>
+
+      <section class="integration-grid" aria-label="API endpoints">
+        <div class="tool-panel endpoint-panel">
+          <div class="panel-title"><div><p class="section-label">ENDPOINT 01</p><h2>Public policy check</h2></div><span class="decision-badge allow">LIVE</span></div>
+          <code>POST /api/check</code>
+          <p>Free deterministic evaluation for demos, development, and internal review flows.</p>
+          <a href="/api/check" target="_blank" rel="noreferrer">Inspect endpoint contract <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="tool-panel endpoint-panel">
+          <div class="panel-title"><div><p class="section-label">ENDPOINT 02</p><h2>Official x402 check</h2></div><span class="decision-badge hold">METERED</span></div>
+          <code>POST /api/check-paid</code>
+          <p>Pay-per-check access implemented with the official OKX x402 Express, Core, and EVM packages.</p>
+          <a href="/api/check-paid" target="_blank" rel="noreferrer">Inspect payment challenge <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="integration-runbook" aria-labelledby="integration-heading">
+        <div class="section-heading"><div><p class="section-label">INTEGRATION RUNBOOK</p><h2 id="integration-heading">Four steps in the agent loop</h2></div></div>
+        <ol class="vertical-steps">
+          <li><span>01</span><div><strong>Construct the proposed action</strong><p>Include chain, operation, destination, amount, user policy, and simulation evidence.</p></div></li>
+          <li><span>02</span><div><strong>POST before signing</strong><p>Call TxSentinel after transaction construction but before wallet authorization.</p></div></li>
+          <li><span>03</span><div><strong>Branch on the decision</strong><p>ALLOW may continue, HOLD needs human review, and DENY must stop.</p></div></li>
+          <li><span>04</span><div><strong>Persist the receipt</strong><p>Store the normalized request and receipt hash, or anchor it on X Layer.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="code-section" aria-labelledby="request-heading">
+        <div class="section-heading"><div><p class="section-label">MINIMUM REQUEST</p><h2 id="request-heading">Copy a working request</h2></div><button id="copy-request" class="secondary-command" type="button">Copy request</button></div>
+        <pre id="request-example"><code>curl -X POST https://txsentinel-okx.vercel.app/api/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "chain": "xlayer",
+    "operation": "transfer",
+    "to": "0x4a6aae28b27681856ae824af82fea87896ecc3ed",
+    "amountUsd": 25,
+    "policy": {
+      "maxSpendUsd": 100,
+      "denyUnlimitedApprovals": true,
+      "requireSimulation": true
+    },
+    "simulation": {
+      "status": "succeeded",
+      "estimatedFeeUsd": 0.01
+    }
+  }'</code></pre>
+      </section>
+
+      <section class="boundary-section" aria-labelledby="integration-boundary-heading">
+        <div class="section-heading"><div><p class="section-label">INTEGRATION BOUNDARY</p><h2 id="integration-boundary-heading">Keep authority where it belongs</h2></div></div>
+        <div class="boundary-grid"><div><strong>YOUR AGENT OWNS</strong><p>Transaction construction, RPC access, private configuration, and downstream execution.</p></div><div><strong>TXSENTINEL OWNS</strong><p>Schema validation, deterministic policy logic, reason codes, and stable receipt hashes.</p></div><div><strong>TXSENTINEL NEVER GETS</strong><p>Private keys, seed phrases, wallet sessions, signing authority, or broadcast permissions.</p></div></div>
+      </section>
+    </main>
+    <footer><span>TxSentinel / agent integration</span><a href="/evaluate.html">Try the live evaluator</a></footer>
+    <script src="/site.js" defer></script>
+    <script src="/integrate.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Evaluate a proposed onchain action against deterministic TxSentinel guardrails." />
+    <title>TxSentinel | Evaluate action</title>
+    <link rel="icon" href="/txsentinel-avatar.png" type="image/png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="TxSentinel overview">
+          <img src="/txsentinel-avatar.png" alt="" width="40" height="40" />
+          <span><strong>TxSentinel</strong><small>Agent transaction control</small></span>
+        </a>
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="/">Overview</a>
+          <a class="active" href="/evaluate.html" aria-current="page">Evaluate</a>
+          <a href="/onchain.html">Onchain</a>
+          <a href="/integrate.html">Integrate</a>
+        </nav>
+        <div class="service-status" aria-label="Service status">
+          <span id="api-status" class="status-chip muted"><i></i>API checking</span>
+          <span id="x402-status" class="status-chip muted"><i></i>x402 checking</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell narrow-shell">
+      <section class="page-heading compact-heading">
+        <div>
+          <p class="eyebrow">POLICY EVALUATION</p>
+          <h1>Evaluate a proposed action</h1>
+          <p>Complete the four steps. No wallet connection or private key is required.</p>
+        </div>
+        <span class="endpoint-label">POST /api/check</span>
+      </section>
+
+      <section class="scenario-panel" aria-labelledby="scenario-heading">
+        <div>
+          <p class="section-label">STARTING POINT</p>
+          <h2 id="scenario-heading">Load a demo scenario</h2>
+        </div>
+        <div class="scenario-tabs" role="group" aria-label="Demo scenarios">
+          <button type="button" class="scenario-tab active" data-scenario="safe" aria-pressed="true">
+            <span class="scenario-result allow">ALLOW</span>Routine transfer
+          </button>
+          <button type="button" class="scenario-tab" data-scenario="hold" aria-pressed="false">
+            <span class="scenario-result hold">HOLD</span>Spend cap breach
+          </button>
+          <button type="button" class="scenario-tab" data-scenario="deny" aria-pressed="false">
+            <span class="scenario-result deny">DENY</span>Unlimited approval
+          </button>
+        </div>
+      </section>
+
+      <nav class="wizard-stepper" aria-label="Evaluation progress">
+        <button type="button" class="wizard-step active" data-step="1" aria-current="step"><span>1</span><strong>Action</strong><small>What is proposed</small></button>
+        <button type="button" class="wizard-step" data-step="2" disabled><span>2</span><strong>Policy</strong><small>User guardrails</small></button>
+        <button type="button" class="wizard-step" data-step="3" disabled><span>3</span><strong>Evidence</strong><small>Simulation data</small></button>
+        <button type="button" class="wizard-step" data-step="4" disabled><span>4</span><strong>Result</strong><small>Decision receipt</small></button>
+      </nav>
+
+      <section class="wizard-shell" aria-live="polite">
+        <form id="policy-form">
+          <section class="wizard-panel active" data-panel="1" aria-labelledby="action-heading">
+            <div class="panel-title">
+              <div><p class="section-label">STEP 1 OF 4</p><h2 id="action-heading">Describe the action</h2></div>
+              <p>These fields identify exactly what the agent wants the wallet to execute.</p>
+            </div>
+            <div class="form-section">
+              <div class="field-grid two">
+                <label><span>Chain</span><select id="chain" name="chain"><option value="xlayer">X Layer</option><option value="ethereum">Ethereum</option><option value="base">Base</option><option value="solana">Solana</option></select></label>
+                <label><span>Operation</span><select id="operation" name="operation"><option value="transfer">Transfer</option><option value="swap">Swap</option><option value="approval">Token approval</option><option value="contract_call">Contract call</option></select></label>
+              </div>
+              <label><span>Recipient or contract</span><input id="to" name="to" autocomplete="off" spellcheck="false" required /></label>
+              <div class="field-grid two">
+                <label><span>Amount</span><div class="unit-input"><input id="amount" name="amount" type="number" inputmode="decimal" min="0" step="0.01" required /><b>USD</b></div></label>
+                <label id="approval-field" class="hidden"><span>Approval amount</span><select id="approval" name="approval"><option value="unlimited">Unlimited</option><option value="1000">1,000 tokens</option><option value="100">100 tokens</option></select></label>
+              </div>
+            </div>
+          </section>
+
+          <section class="wizard-panel" data-panel="2" aria-labelledby="policy-heading">
+            <div class="panel-title">
+              <div><p class="section-label">STEP 2 OF 4</p><h2 id="policy-heading">Set user guardrails</h2></div>
+              <p>The user or agent owner defines these rules before execution.</p>
+            </div>
+            <div class="form-section">
+              <div class="field-grid three">
+                <label><span>Spend cap</span><div class="unit-input"><input id="max-spend" type="number" inputmode="decimal" min="0" step="1" /><b>USD</b></div></label>
+                <label><span>Max slippage</span><div class="unit-input"><input id="max-slippage" type="number" inputmode="numeric" min="0" max="10000" step="1" /><b>BPS</b></div></label>
+                <label><span>Fee cap</span><div class="unit-input"><input id="max-fee" type="number" inputmode="decimal" min="0" step="0.01" /><b>USD</b></div></label>
+              </div>
+              <label><span>Allowlisted recipients <small>Optional, comma separated</small></span><input id="allowlist" autocomplete="off" spellcheck="false" placeholder="0xabc..., 0xdef..." /></label>
+              <div class="toggle-grid">
+                <label class="toggle"><input id="deny-unlimited" type="checkbox" /><span></span><b>Deny unlimited approvals</b></label>
+                <label class="toggle"><input id="require-simulation" type="checkbox" /><span></span><b>Require simulation</b></label>
+                <label class="toggle"><input id="require-verified" type="checkbox" /><span></span><b>Require verified contract</b></label>
+              </div>
+            </div>
+          </section>
+
+          <section class="wizard-panel" data-panel="3" aria-labelledby="evidence-heading">
+            <div class="panel-title">
+              <div><p class="section-label">STEP 3 OF 4</p><h2 id="evidence-heading">Add simulation evidence</h2></div>
+              <p>TxSentinel validates supplied evidence; it does not claim to run an RPC simulation itself.</p>
+            </div>
+            <div class="form-section">
+              <div class="field-grid three">
+                <label><span>Simulation status</span><select id="simulation-status"><option value="succeeded">Succeeded</option><option value="not_run">Not run</option><option value="reverted">Reverted</option></select></label>
+                <label><span>Estimated fee</span><div class="unit-input"><input id="estimated-fee" type="number" inputmode="decimal" min="0" step="0.01" /><b>USD</b></div></label>
+                <label><span>Observed slippage</span><div class="unit-input"><input id="slippage" type="number" inputmode="numeric" min="0" max="10000" step="1" /><b>BPS</b></div></label>
+              </div>
+              <label class="toggle inline"><input id="contract-verified" type="checkbox" /><span></span><b>Contract source verified</b></label>
+              <div class="evidence-note"><strong>Evidence boundary</strong><p>The API treats these values as supplied evidence and includes that provenance in its response.</p></div>
+            </div>
+          </section>
+
+          <section class="wizard-panel" data-panel="4" aria-labelledby="result-heading">
+            <div class="panel-title">
+              <div><p class="section-label">STEP 4 OF 4</p><h2 id="result-heading">Review and evaluate</h2></div>
+              <span id="decision-badge" class="decision-badge idle">READY</span>
+            </div>
+
+            <dl class="review-summary" aria-label="Request summary">
+              <div><dt>Action</dt><dd id="review-action">-</dd></div>
+              <div><dt>Destination</dt><dd id="review-to">-</dd></div>
+              <div><dt>Policy cap</dt><dd id="review-cap">-</dd></div>
+              <div><dt>Evidence</dt><dd id="review-evidence">-</dd></div>
+            </dl>
+
+            <div id="empty-receipt" class="empty-receipt compact-empty">
+              <span>TX</span><h3>Ready to evaluate</h3><p>Review the summary, then run the live deterministic policy API.</p>
+            </div>
+
+            <div id="receipt-content" class="receipt-content hidden">
+              <div class="decision-summary"><div><span class="metric-label">RISK SCORE</span><strong id="risk-value">0</strong><small>/100</small></div><div class="risk-track"><i id="risk-bar"></i></div></div>
+              <dl class="receipt-facts">
+                <div><dt>Policy</dt><dd id="policy-version"></dd></div><div><dt>Action digest</dt><dd id="action-digest"></dd></div><div><dt>Receipt hash</dt><dd id="receipt-hash"></dd></div><div><dt>Evaluated</dt><dd id="evaluated-at"></dd></div>
+              </dl>
+              <div class="reason-section"><p class="section-label">RULE EVIDENCE</p><div id="reason-list" class="reason-list"></div></div>
+              <div class="receipt-actions"><button id="copy-receipt" type="button">Copy JSON</button><button id="download-receipt" type="button">Download receipt</button><a href="/onchain.html">Continue to onchain proof <span aria-hidden="true">→</span></a></div>
+              <details><summary>Raw API response</summary><pre id="raw-response"></pre></details>
+            </div>
+            <div id="error-panel" class="error-panel hidden"><strong>Request failed</strong><p id="error-message"></p></div>
+          </section>
+
+          <div class="wizard-actions">
+            <button id="previous-step" class="secondary-command" type="button" disabled>Back</button>
+            <span id="step-position">Step 1 of 4</span>
+            <button id="next-step" class="primary-command" type="button"><span>Continue</span><b aria-hidden="true">→</b></button>
+            <button id="evaluate" class="primary-command hidden" type="submit"><span>Evaluate transaction</span><b>RUN</b></button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer><span>TxSentinel / deterministic policy engine</span><a href="/integrate.html">API integration guide</a></footer>
+    <script src="/site.js" defer></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

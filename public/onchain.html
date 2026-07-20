@@ -3,135 +3,85 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Use TxSentinel's canonical non-custodial policy and receipt anchor on X Layer Testnet with OKX Wallet."
-    />
-    <title>TxSentinel | X Layer receipt anchor</title>
+    <meta name="description" content="Register TxSentinel policies and anchor deterministic receipts on X Layer Testnet with OKX Wallet." />
+    <title>TxSentinel | Onchain evidence</title>
     <link rel="icon" href="/txsentinel-avatar.png" type="image/png" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="/" aria-label="TxSentinel home">
-        <img src="/txsentinel-avatar.png" alt="" />
-        <span><strong>TxSentinel</strong><small>X Layer policy receipt anchor</small></span>
-      </a>
-      <div class="service-status" aria-label="Chain status">
-        <span id="wallet-chip" class="status-chip muted"><i></i>Wallet disconnected</span>
-        <span id="network-chip" class="status-chip muted"><i></i>X Layer Testnet</span>
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="TxSentinel overview"><img src="/txsentinel-avatar.png" alt="" width="40" height="40" /><span><strong>TxSentinel</strong><small>Agent transaction control</small></span></a>
+        <nav class="primary-nav" aria-label="Primary navigation"><a href="/">Overview</a><a href="/evaluate.html">Evaluate</a><a class="active" href="/onchain.html" aria-current="page">Onchain</a><a href="/integrate.html">Integrate</a></nav>
+        <div class="service-status" aria-label="Wallet status"><span id="wallet-chip" class="status-chip muted"><i></i>Wallet disconnected</span><span id="network-chip" class="status-chip muted"><i></i>X Layer Testnet</span></div>
       </div>
-      <nav aria-label="Project links">
-        <a href="/">Console</a>
-        <a href="/contracts/TxSentinelPolicyAnchor.json" target="_blank" rel="noreferrer">ABI</a>
-        <a href="https://github.com/FeeeeelixWong/txsentinel-okx" target="_blank" rel="noreferrer">GitHub</a>
-      </nav>
     </header>
 
-    <main class="onchain-main">
-      <section class="chain-hero">
-        <div>
-          <p class="eyebrow">X LAYER TESTNET / NON-CUSTODIAL ATTESTATION</p>
-          <h1>Put the decision onchain, not the private key.</h1>
-          <p>
-            TxSentinel evaluates an action offchain, then anchors its policy version, action digest,
-            decision, and deterministic receipt hash to an immutable X Layer contract.
-          </p>
-        </div>
-        <ol class="chain-flow" aria-label="Onchain architecture">
-          <li><span>01</span><strong>Evaluate</strong><small>Live policy API</small></li>
-          <li><span>02</span><strong>Attest</strong><small>OKX Wallet confirmation</small></li>
-          <li><span>03</span><strong>Verify</strong><small>X Layer receipt</small></li>
-        </ol>
+    <main class="app-shell">
+      <section class="page-heading compact-heading">
+        <div><p class="eyebrow">X LAYER TESTNET / NON-CUSTODIAL EVIDENCE</p><h1>Register the rule. Anchor the receipt.</h1><p>Policy evaluation happens offchain. OKX Wallet confirms each write. The canonical contract stores evidence without custody or execution authority.</p></div>
+        <span class="endpoint-label">eip155:1952</span>
       </section>
 
-      <section class="chain-status" aria-label="Deployment state">
+      <section class="chain-status" aria-label="Onchain progress">
         <div><span>WALLET</span><strong id="wallet-value">Not connected</strong></div>
-        <div><span>CONTRACT</span><strong id="contract-value">Not deployed</strong></div>
+        <div><span>CONTRACT</span><strong id="contract-value">Checking canonical deployment</strong></div>
         <div><span>POLICY</span><strong id="policy-value">Not registered</strong></div>
         <div><span>LAST RECEIPT</span><strong id="receipt-value">None</strong></div>
       </section>
 
-      <section class="deployment-console" aria-labelledby="deployment-heading">
-        <div class="console-heading">
-          <div>
-            <p class="section-label">ONCHAIN CONSOLE</p>
-            <h2 id="deployment-heading">From canonical contract to verifiable policy evidence</h2>
-          </div>
-          <span class="endpoint-label">eip155:1952</span>
+      <section class="process-section" aria-labelledby="setup-heading">
+        <div class="section-heading">
+          <div><p class="section-label">ONE-TIME SETUP</p><h2 id="setup-heading">Prepare the policy anchor</h2></div>
+          <p>Complete these steps once for each wallet-owned policy.</p>
         </div>
 
         <div class="deployment-step">
           <div class="step-index">01</div>
-          <div class="step-copy">
-            <h3>Connect OKX Wallet</h3>
-            <p>The page requests only your public account and X Layer Testnet. No private key is exposed.</p>
-          </div>
+          <div class="step-copy"><h3>Connect OKX Wallet</h3><p>Requests only the public account and X Layer Testnet. No private key is exposed.</p></div>
           <button id="connect-wallet" class="step-command" type="button">Connect wallet</button>
         </div>
 
         <div class="deployment-step">
           <div class="step-index">02</div>
-          <div class="step-copy">
-            <h3>Verify the canonical receipt anchor</h3>
-            <p>The fixed, non-upgradeable contract has no admin, payable function, external call, or asset custody.</p>
-          </div>
+          <div class="step-copy"><h3>Verify the canonical contract</h3><p>Confirm the fixed address and bytecode. The contract has no admin, upgrade, asset custody, or external execution call.</p></div>
           <a id="canonical-contract-link" class="step-command secondary command-link" target="_blank" rel="noreferrer">View contract</a>
         </div>
 
         <div class="deployment-step">
           <div class="step-index">03</div>
           <div class="step-copy">
-            <h3>Register TxSentinel policy v1</h3>
-            <p>Records the canonical policy ID, ruleset hash, owner, revision, and active status.</p>
-            <dl class="compact-facts">
-              <div><dt>Policy key</dt><dd id="policy-id">Loading...</dd></div>
-              <div><dt>Ruleset hash</dt><dd id="policy-hash">Loading...</dd></div>
-            </dl>
+            <h3>Register policy v1</h3><p>This one-time transaction records the policy ID, ruleset hash, owner, revision, and active status.</p>
+            <dl class="compact-facts"><div><dt>Policy key</dt><dd id="policy-id">Loading...</dd></div><div><dt>Ruleset hash</dt><dd id="policy-hash">Loading...</dd></div></dl>
           </div>
           <button id="register-policy" class="step-command" type="button" disabled>Register policy</button>
         </div>
+      </section>
 
+      <section class="process-section per-action-section" aria-labelledby="receipt-step-heading">
+        <div class="section-heading">
+          <div><p class="section-label">PER ACTION</p><h2 id="receipt-step-heading">Evaluate and anchor evidence</h2></div>
+          <p>Repeat this step for each proposed action that needs a verifiable receipt.</p>
+        </div>
         <div class="deployment-step receipt-step">
           <div class="step-index">04</div>
-          <div class="step-copy">
-            <h3>Evaluate and anchor a live receipt</h3>
-            <p>The public API produces the same deterministic evidence shown in the main console. Your wallet anchors its hash.</p>
-            <div id="anchor-preview" class="anchor-preview">
-              <span>Run the live evaluation to prepare an anchor transaction.</span>
-            </div>
-          </div>
-          <div class="step-actions">
-            <button id="evaluate-live" class="step-command secondary" type="button">Evaluate live</button>
-            <button id="anchor-receipt" class="step-command" type="button" disabled>Anchor receipt</button>
-          </div>
+          <div class="step-copy"><h3>Create a live deterministic receipt</h3><p>The API evaluates a sample action. OKX Wallet then anchors the policy revision, decision, action digest, and receipt hash.</p><div id="anchor-preview" class="anchor-preview"><span>Run the live evaluation to prepare an anchor transaction.</span></div></div>
+          <div class="step-actions"><button id="evaluate-live" class="step-command secondary" type="button">Evaluate live</button><button id="anchor-receipt" class="step-command" type="button" disabled>Anchor receipt</button></div>
         </div>
       </section>
 
       <section id="transaction-panel" class="transaction-panel" aria-live="polite">
-        <div>
-          <p class="section-label">ACTIVITY</p>
-          <strong id="activity-title">Ready for wallet connection</strong>
-          <p id="activity-detail">Connect OKX Wallet to verify the canonical contract and register your policy.</p>
-        </div>
+        <div><p class="section-label">CURRENT ACTIVITY</p><strong id="activity-title">Ready for wallet connection</strong><p id="activity-detail">Connect OKX Wallet to verify the canonical contract and register your policy.</p></div>
         <a id="activity-link" class="hidden" target="_blank" rel="noreferrer">View on explorer</a>
       </section>
 
-      <section class="boundary-band" aria-labelledby="boundary-heading">
-        <div>
-          <p class="section-label">TRUST BOUNDARY</p>
-          <h2 id="boundary-heading">An attestation, not an execution engine</h2>
-        </div>
-        <div><strong>THE CONTRACT PROVES</strong><p>Which address anchored a receipt, against which policy revision, at what block time.</p></div>
-        <div><strong>THE CONTRACT DOES NOT CLAIM</strong><p>That the chain re-executed the offchain rules or authorized a downstream asset transfer.</p></div>
-        <div><strong>PRODUCTION PATH</strong><p>A Safe module or ERC-4337 validator can require an authorized receipt before execution.</p></div>
+      <section class="boundary-section" aria-labelledby="onchain-boundary-heading">
+        <div class="section-heading"><div><p class="section-label">TRUST BOUNDARY</p><h2 id="onchain-boundary-heading">Proof of a decision, not permission to spend</h2></div></div>
+        <div class="boundary-grid"><div><strong>CONTRACT PROVES</strong><p>Who anchored a receipt, against which policy revision, and at what block time.</p></div><div><strong>CONTRACT DOES NOT CLAIM</strong><p>That X Layer re-executed the offchain rules or authorized an asset transfer.</p></div><div><strong>PRODUCTION ENFORCEMENT</strong><p>A Safe module or ERC-4337 validator can require an authorized receipt before execution.</p></div></div>
       </section>
     </main>
 
-    <footer>
-      <span>TxSentinel / ASP #6828</span>
-      <span>Policy logic offchain / evidence on X Layer</span>
-    </footer>
+    <footer><span>TxSentinel / policy logic offchain</span><a href="/evaluate.html">Return to evaluator</a></footer>
     <script src="/onchain.js" defer></script>
   </body>
 </html>

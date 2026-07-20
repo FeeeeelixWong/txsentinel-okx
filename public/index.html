@@ -5,239 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="TxSentinel evaluates proposed onchain actions before an autonomous agent signs them."
+      content="TxSentinel is a deterministic transaction policy firewall and X Layer receipt anchor for autonomous agents."
     />
-    <title>TxSentinel | Agent transaction policy firewall</title>
+    <title>TxSentinel | Agent transaction control</title>
     <link rel="icon" href="/txsentinel-avatar.png" type="image/png" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="/" aria-label="TxSentinel home">
-        <img src="/txsentinel-avatar.png" alt="" />
-        <span><strong>TxSentinel</strong><small>Agent transaction policy firewall</small></span>
-      </a>
-      <div class="service-status" aria-label="Service status">
-        <span id="api-status" class="status-chip"><i></i>API checking</span>
-        <span id="x402-status" class="status-chip muted"><i></i>x402 checking</span>
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="TxSentinel overview">
+          <img src="/txsentinel-avatar.png" alt="" width="40" height="40" />
+          <span><strong>TxSentinel</strong><small>Agent transaction control</small></span>
+        </a>
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a class="active" href="/" aria-current="page">Overview</a>
+          <a href="/evaluate.html">Evaluate</a>
+          <a href="/onchain.html">Onchain</a>
+          <a href="/integrate.html">Integrate</a>
+        </nav>
+        <div class="service-status" aria-label="Service status">
+          <span id="api-status" class="status-chip muted"><i></i>API checking</span>
+          <span id="x402-status" class="status-chip muted"><i></i>x402 checking</span>
+        </div>
       </div>
-      <nav aria-label="Project links">
-        <a href="/api/check" target="_blank" rel="noreferrer">API</a>
-        <a href="/onchain.html">Onchain</a>
-        <a href="https://github.com/FeeeeelixWong/txsentinel-okx" target="_blank" rel="noreferrer">GitHub</a>
-      </nav>
     </header>
 
-    <main>
-      <section class="intro-band">
+    <main class="app-shell">
+      <section class="page-heading overview-heading">
         <div>
-          <p class="eyebrow">OKX.AI GENESIS HACKATHON / SOFTWARE UTILITY</p>
-          <h1>Inspect the action before the agent signs.</h1>
+          <p class="eyebrow">OKX.AI GENESIS HACKATHON / ASP #6828</p>
+          <h1>Control the transaction before it reaches the wallet.</h1>
           <p>
-            Submit a proposed onchain transaction and get an explainable, deterministic
-            <strong>ALLOW</strong>, <strong>HOLD</strong>, or <strong>DENY</strong> receipt.
+            One workspace for deterministic policy evaluation, human review, wallet approval,
+            and immutable X Layer evidence.
           </p>
         </div>
-        <ol class="flow" aria-label="Evaluation flow">
-          <li><span>01</span>Proposed action</li>
-          <li><span>02</span>Policy evaluation</li>
-          <li><span>03</span>Decision receipt</li>
+        <a class="primary-link" href="/evaluate.html">Start an evaluation <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="overview-block" aria-labelledby="runbook-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">PRODUCT RUNBOOK</p>
+            <h2 id="runbook-heading">One action, four controlled stages</h2>
+          </div>
+          <p>Policy logic stays offchain. Wallet authority stays with the user. Evidence is anchored onchain.</p>
+        </div>
+        <ol class="runbook-grid">
+          <li>
+            <span>01</span>
+            <strong>Describe action</strong>
+            <p>Chain, operation, recipient, amount, and supplied simulation evidence.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>Evaluate policy</strong>
+            <p>Deterministic rules return ALLOW, HOLD, or DENY with exact reasons.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>Confirm in wallet</strong>
+            <p>OKX Wallet remains the only signing boundary. TxSentinel never receives a key.</p>
+          </li>
+          <li>
+            <span>04</span>
+            <strong>Anchor evidence</strong>
+            <p>X Layer stores the policy revision, action digest, decision, and receipt hash.</p>
+          </li>
         </ol>
       </section>
 
-      <section class="scenario-strip" aria-label="Demo scenarios">
-        <div class="section-label">DEMO SCENARIOS</div>
-        <div class="scenario-tabs" role="tablist">
-          <button type="button" class="scenario-tab active" data-scenario="safe" role="tab" aria-selected="true">
-            <span class="scenario-result allow">ALLOW</span>
-            Routine transfer
-          </button>
-          <button type="button" class="scenario-tab" data-scenario="hold" role="tab" aria-selected="false">
-            <span class="scenario-result hold">HOLD</span>
-            Spend cap breach
-          </button>
-          <button type="button" class="scenario-tab" data-scenario="deny" role="tab" aria-selected="false">
-            <span class="scenario-result deny">DENY</span>
-            Unlimited approval
-          </button>
+      <section class="overview-grid" aria-label="Workspace status and tasks">
+        <div class="tool-panel status-panel">
+          <div class="panel-title">
+            <div>
+              <p class="section-label">SYSTEM STATUS</p>
+              <h2>Ready state</h2>
+            </div>
+            <span class="endpoint-label">X Layer Testnet</span>
+          </div>
+          <dl class="status-list">
+            <div><dt>Policy API</dt><dd id="api-state">Checking</dd></div>
+            <div><dt>Official x402</dt><dd id="x402-state">Checking</dd></div>
+            <div><dt>Canonical contract</dt><dd><a href="https://www.okx.com/web3/explorer/xlayer-test/address/0x295975cbec1673061d11c223b35a8513d1ebb213" target="_blank" rel="noreferrer">0x295975...bb213</a></dd></div>
+            <div><dt>Signing authority</dt><dd>OKX Wallet only</dd></div>
+          </dl>
+        </div>
+
+        <div class="tool-panel task-panel">
+          <div class="panel-title">
+            <div>
+              <p class="section-label">CHOOSE A TASK</p>
+              <h2>Workspace</h2>
+            </div>
+          </div>
+          <div class="task-list">
+            <a href="/evaluate.html"><span>01</span><div><strong>Evaluate a proposed action</strong><p>Configure rules and produce a deterministic receipt.</p></div><b aria-hidden="true">→</b></a>
+            <a href="/onchain.html"><span>02</span><div><strong>Register policy and anchor evidence</strong><p>Use OKX Wallet with the canonical X Layer contract.</p></div><b aria-hidden="true">→</b></a>
+            <a href="/integrate.html"><span>03</span><div><strong>Integrate with an agent</strong><p>Use the public JSON API or official x402 endpoint.</p></div><b aria-hidden="true">→</b></a>
+          </div>
         </div>
       </section>
 
-      <div class="workspace">
-        <section class="input-pane" aria-labelledby="request-heading">
-          <div class="pane-heading">
-            <div>
-              <p class="section-label">POLICY REQUEST</p>
-              <h2 id="request-heading">Proposed transaction</h2>
-            </div>
-            <span class="endpoint-label">POST /api/check</span>
+      <section class="boundary-section" aria-labelledby="boundary-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">CLEAR RESPONSIBILITIES</p>
+            <h2 id="boundary-heading">Three boundaries, no hidden authority</h2>
           </div>
-
-          <form id="policy-form">
-            <fieldset>
-              <legend>Action</legend>
-              <div class="field-grid two">
-                <label>
-                  <span>Chain</span>
-                  <select id="chain" name="chain">
-                    <option value="xlayer">X Layer</option>
-                    <option value="ethereum">Ethereum</option>
-                    <option value="base">Base</option>
-                    <option value="solana">Solana</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Operation</span>
-                  <select id="operation" name="operation">
-                    <option value="transfer">Transfer</option>
-                    <option value="swap">Swap</option>
-                    <option value="approval">Token approval</option>
-                    <option value="contract_call">Contract call</option>
-                  </select>
-                </label>
-              </div>
-              <label>
-                <span>Recipient or contract</span>
-                <input id="to" name="to" autocomplete="off" spellcheck="false" />
-              </label>
-              <div class="field-grid two">
-                <label>
-                  <span>Amount, USD</span>
-                  <input id="amount" name="amount" type="number" min="0" step="0.01" />
-                </label>
-                <label id="approval-field" class="hidden">
-                  <span>Approval amount</span>
-                  <select id="approval" name="approval">
-                    <option value="unlimited">Unlimited</option>
-                    <option value="1000">1,000 tokens</option>
-                    <option value="100">100 tokens</option>
-                  </select>
-                </label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend>Guardrails</legend>
-              <div class="field-grid three">
-                <label>
-                  <span>Spend cap</span>
-                  <div class="unit-input"><input id="max-spend" type="number" min="0" step="1" /><b>USD</b></div>
-                </label>
-                <label>
-                  <span>Max slippage</span>
-                  <div class="unit-input"><input id="max-slippage" type="number" min="0" max="10000" step="1" /><b>BPS</b></div>
-                </label>
-                <label>
-                  <span>Fee cap</span>
-                  <div class="unit-input"><input id="max-fee" type="number" min="0" step="0.01" /><b>USD</b></div>
-                </label>
-              </div>
-              <label>
-                <span>Allowlisted recipients <small>comma separated, optional</small></span>
-                <input id="allowlist" autocomplete="off" spellcheck="false" placeholder="0xabc..., 0xdef..." />
-              </label>
-              <div class="toggle-grid">
-                <label class="toggle"><input id="deny-unlimited" type="checkbox" /><span></span>Deny unlimited approvals</label>
-                <label class="toggle"><input id="require-simulation" type="checkbox" /><span></span>Require simulation</label>
-                <label class="toggle"><input id="require-verified" type="checkbox" /><span></span>Require verified contract</label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend>Simulation evidence</legend>
-              <div class="field-grid three">
-                <label>
-                  <span>Status</span>
-                  <select id="simulation-status">
-                    <option value="succeeded">Succeeded</option>
-                    <option value="not_run">Not run</option>
-                    <option value="reverted">Reverted</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Estimated fee</span>
-                  <div class="unit-input"><input id="estimated-fee" type="number" min="0" step="0.01" /><b>USD</b></div>
-                </label>
-                <label>
-                  <span>Observed slippage</span>
-                  <div class="unit-input"><input id="slippage" type="number" min="0" max="10000" step="1" /><b>BPS</b></div>
-                </label>
-              </div>
-              <label class="toggle inline"><input id="contract-verified" type="checkbox" /><span></span>Contract source verified</label>
-            </fieldset>
-
-            <button id="evaluate" class="primary-command" type="submit">
-              <span>Evaluate transaction</span><kbd>RUN</kbd>
-            </button>
-          </form>
-        </section>
-
-        <section class="receipt-pane" aria-labelledby="receipt-heading" aria-live="polite">
-          <div class="pane-heading">
-            <div>
-              <p class="section-label">DETERMINISTIC RECEIPT</p>
-              <h2 id="receipt-heading">Policy decision</h2>
-            </div>
-            <span id="decision-badge" class="decision-badge idle">READY</span>
-          </div>
-
-          <div id="empty-receipt" class="empty-receipt">
-            <span>TX</span>
-            <h3>No evaluation yet</h3>
-            <p>Run a demo scenario or edit the policy request. The response is generated by the live public API.</p>
-          </div>
-
-          <div id="receipt-content" class="receipt-content hidden">
-            <div class="decision-summary">
-              <div>
-                <span class="metric-label">RISK SCORE</span>
-                <strong id="risk-value">0</strong><small>/100</small>
-              </div>
-              <div class="risk-track"><i id="risk-bar"></i></div>
-            </div>
-
-            <dl class="receipt-facts">
-              <div><dt>Policy</dt><dd id="policy-version"></dd></div>
-              <div><dt>Action digest</dt><dd id="action-digest"></dd></div>
-              <div><dt>Receipt hash</dt><dd id="receipt-hash"></dd></div>
-              <div><dt>Evaluated</dt><dd id="evaluated-at"></dd></div>
-            </dl>
-
-            <div class="reason-section">
-              <p class="section-label">RULE EVIDENCE</p>
-              <div id="reason-list" class="reason-list"></div>
-            </div>
-
-            <div class="receipt-actions">
-              <button id="copy-receipt" type="button">Copy JSON</button>
-              <button id="download-receipt" type="button">Download receipt</button>
-            </div>
-
-            <details>
-              <summary>Raw API response</summary>
-              <pre id="raw-response"></pre>
-            </details>
-          </div>
-
-          <div id="error-panel" class="error-panel hidden">
-            <strong>Request failed</strong>
-            <p id="error-message"></p>
-          </div>
-        </section>
-      </div>
-
-      <section class="trust-band" aria-label="Security properties">
-        <div><strong>READ ONLY</strong><span>No key access, signing, or broadcasting</span></div>
-        <div><strong>DETERMINISTIC</strong><span>Stable SHA-256 receipt for identical normalized inputs</span></div>
-        <div><strong>AGENT NATIVE</strong><span>Structured evidence for autonomous workflows</span></div>
-        <div><strong>OKX x402</strong><span>Official paid endpoint isolated at /api/check-paid</span></div>
+        </div>
+        <div class="boundary-grid">
+          <div><strong>TXSENTINEL</strong><p>Normalizes inputs, checks user-defined rules, and produces reproducible evidence.</p></div>
+          <div><strong>OKX WALLET</strong><p>Shows the transaction and remains the only place where the user can authorize signing.</p></div>
+          <div><strong>X LAYER</strong><p>Preserves policy revisions and receipt hashes so the decision can be verified later.</p></div>
+        </div>
       </section>
     </main>
 
     <footer>
       <span>TxSentinel / ASP #6828</span>
-      <span>Built for OKX.AI Genesis Hackathon</span>
+      <a href="https://github.com/FeeeeelixWong/txsentinel-okx" target="_blank" rel="noreferrer">Source and documentation</a>
     </footer>
-    <script src="/app.js" defer></script>
+    <script src="/site.js" defer></script>
   </body>
 </html>

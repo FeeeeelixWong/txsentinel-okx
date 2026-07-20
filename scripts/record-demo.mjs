@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import { chromium } from "playwright";
 
 const appUrl = process.env.DEMO_APP_URL || "https://txsentinel-okx.vercel.app";
+const evaluateUrl = new URL("/evaluate.html", appUrl).toString();
 const outputDir = resolve("output/submission");
 const tempDir = resolve("tmp/demo-video");
 const voiceDir = join(tempDir, "voice");
@@ -183,10 +184,13 @@ const showCaption = (page, text) => page.evaluate((captionText) => {
 }, text);
 
 const evaluateScenario = async (page, name, decision) => {
-  await page.getByRole("tab", { name: new RegExp(name, "i") }).click();
+  await page.getByRole("button", { name: new RegExp(name, "i") }).click();
+  for (let step = 0; step < 3; step += 1) {
+    await page.getByRole("button", { name: /Continue/i }).click();
+  }
   await page.getByRole("button", { name: /Evaluate transaction/i }).click();
   await page.locator("#decision-badge").getByText(decision, { exact: true }).waitFor({ timeout: 10_000 });
-  await page.locator(".workspace").scrollIntoViewIfNeeded();
+  await page.locator(".wizard-shell").scrollIntoViewIfNeeded();
 };
 
 const step = async (page, segment, action) => {
@@ -206,8 +210,8 @@ const record = async (timed) => {
       recordVideo: { dir: tempDir, size: { width: 1600, height: 900 } },
     });
     const page = await context.newPage();
-    await page.goto(appUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await page.getByRole("button", { name: /Evaluate transaction/i }).waitFor({ timeout: 30_000 });
+    await page.goto(evaluateUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.getByRole("button", { name: /Continue/i }).waitFor({ timeout: 30_000 });
     await installDemoStyles(page);
 
     await step(page, timed[0], () => showScene(page, "intro"));

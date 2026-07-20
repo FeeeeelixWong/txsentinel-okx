@@ -3,8 +3,10 @@
 TxSentinel is a deterministic transaction policy firewall for autonomous agents. Before an agent signs an onchain action, TxSentinel evaluates its intent, policy limits, and supplied simulation evidence, then returns an explainable `ALLOW`, `HOLD`, or `DENY` receipt.
 
 - Live product: [txsentinel-okx.vercel.app](https://txsentinel-okx.vercel.app)
+- Policy evaluator: [txsentinel-okx.vercel.app/evaluate.html](https://txsentinel-okx.vercel.app/evaluate.html)
 - Free review API: [txsentinel-okx.vercel.app/api/check](https://txsentinel-okx.vercel.app/api/check)
 - X Layer onchain console: [txsentinel-okx.vercel.app/onchain.html](https://txsentinel-okx.vercel.app/onchain.html)
+- Agent integration guide: [txsentinel-okx.vercel.app/integrate.html](https://txsentinel-okx.vercel.app/integrate.html)
 - ASP candidate: `TxSentinel #6828`, listing review submitted
 - Hackathon: OKX.AI Genesis Hackathon
 
@@ -137,7 +139,7 @@ TxSentinel is read-only. It rejects unknown top-level and policy fields, caps re
 api/check.js          Free deterministic policy endpoint
 api/check-paid.js     Official OKX x402 protected endpoint
 lib/policy.js         Pure policy and receipt engine
-public/               Interactive product console
+public/               Overview, four-step evaluator, onchain console, and integration guide
 contracts/            Non-custodial X Layer policy receipt anchor
 scripts/smoke.mjs     Deployment smoke suite
 test/                 Policy and HTTP contract tests

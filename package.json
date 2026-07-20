@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "npm run contract:compile && node --test",
-    "check": "node --check api/check.js && node --check api/check-paid.js && node --check api/health.js && node --check lib/policy.js && node --check public/app.js && node --check public/onchain.js && node --check scripts/compile-contract.mjs && npm run contract:lint",
+    "check": "node --check api/check.js && node --check api/check-paid.js && node --check api/health.js && node --check lib/policy.js && node --check public/site.js && node --check public/app.js && node --check public/onchain.js && node --check public/integrate.js && node --check scripts/compile-contract.mjs && node --check scripts/record-demo.mjs && npm run contract:lint",
     "smoke": "node scripts/smoke.mjs",
     "demo:record": "node scripts/record-demo.mjs",
     "docs:diagrams": "node scripts/render-doc-diagrams.mjs",
