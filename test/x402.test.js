@@ -38,6 +38,11 @@ test("official OKX middleware emits a standard unpaid 402 challenge", async () =
   process.env.OKX_X402_BASE_URL = `http://127.0.0.1:${facilitatorPort}`;
 
   const app = require("../api/check-paid");
+  assert.equal(app.resolveFacilitatorBaseUrl({}), "https://web3.okx.com");
+  assert.equal(
+    app.resolveFacilitatorBaseUrl({ OKX_X402_BASE_URL: `http://127.0.0.1:${facilitatorPort}` }),
+    `http://127.0.0.1:${facilitatorPort}`
+  );
   const resource = http.createServer(app);
   const resourcePort = await listen(resource);
 

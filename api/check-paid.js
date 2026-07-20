@@ -4,6 +4,12 @@ const { ExactEvmScheme } = require("@okxweb3/x402-evm/exact/server");
 const { paymentMiddleware, x402ResourceServer } = require("@okxweb3/x402-express");
 const { evaluateTransaction, validateTransaction } = require("../lib/policy");
 
+const DEFAULT_FACILITATOR_BASE_URL = "https://web3.okx.com";
+
+function resolveFacilitatorBaseUrl(env = process.env) {
+  return env.OKX_X402_BASE_URL || DEFAULT_FACILITATOR_BASE_URL;
+}
+
 const app = express();
 const network = process.env.X402_NETWORK || "eip155:1952";
 const price = process.env.X402_PRICE || "$0.01";
@@ -32,7 +38,7 @@ if (configured) {
     apiKey: process.env.OKX_API_KEY,
     secretKey: process.env.OKX_SECRET_KEY,
     passphrase: process.env.OKX_PASSPHRASE,
-    baseUrl: process.env.OKX_X402_BASE_URL,
+    baseUrl: resolveFacilitatorBaseUrl(),
     syncSettle: true
   });
   const resourceServer = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme());
@@ -77,3 +83,4 @@ app.post("/api/check-paid", (req, res) => {
 });
 
 module.exports = app;
+module.exports.resolveFacilitatorBaseUrl = resolveFacilitatorBaseUrl;
