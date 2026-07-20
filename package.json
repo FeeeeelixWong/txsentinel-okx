@@ -22,7 +22,7 @@
     "zod": "3.25.76"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "license": "MIT"
 }
