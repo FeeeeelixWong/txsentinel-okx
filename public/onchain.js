@@ -38,6 +38,68 @@ function explorerUrl(type, value) {
   return `${artifact.network.blockExplorerUrl}/${type}/${value}`;
 }
 
+function hexQuantity(value) {
+  return `0x${BigInt(value).toString(16)}`;
+}
+
+function formatNative(value, decimals = 8) {
+  const base = 10n ** 18n;
+  const whole = value / base;
+  const fraction = (value % base).toString().padStart(18, "0").slice(0, decimals).replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : `${whole}`;
+}
+
+async function directRpc(method, params = []) {
+  let lastError;
+  for (const url of artifact.network.rpcUrls) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: Date.now(), method, params })
+      });
+      if (!response.ok) throw new Error(`RPC returned HTTP ${response.status}`);
+      const body = await response.json();
+      if (body.error) throw new Error(body.error.message || `RPC ${method} failed`);
+      return body.result;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`RPC ${method} failed`);
+}
+
+async function prepareTransaction(transaction) {
+  const [chainId, estimateHex, gasPriceHex, balanceHex] = await Promise.all([
+    directRpc("eth_chainId"),
+    directRpc("eth_estimateGas", [transaction]),
+    directRpc("eth_gasPrice"),
+    directRpc("eth_getBalance", [account, "latest"])
+  ]);
+  if (chainId.toLowerCase() !== artifact.network.chainIdHex) {
+    throw new Error(`RPC chain mismatch: expected ${artifact.network.chainIdHex}, received ${chainId}.`);
+  }
+
+  const estimate = BigInt(estimateHex);
+  const gasPrice = BigInt(gasPriceHex);
+  const gasLimit = (estimate * 120n + 99n) / 100n;
+  const maximumFee = gasLimit * gasPrice;
+  if (BigInt(balanceHex) < maximumFee) {
+    throw new Error(`Insufficient X Layer Testnet OKB. Maximum estimated fee is ${formatNative(maximumFee)} OKB.`);
+  }
+
+  return {
+    transaction: {
+      ...transaction,
+      gas: hexQuantity(gasLimit),
+      gasPrice: hexQuantity(gasPrice)
+    },
+    estimate,
+    gasLimit,
+    maximumFee
+  };
+}
+
 function setActivity(title, detail, link = "", isError = false) {
   byId("activity-title").textContent = title;
   byId("activity-detail").textContent = detail;
@@ -143,10 +205,21 @@ async function waitForReceipt(hash, timeoutMs = 180000) {
 
 async function sendTransaction(data, label) {
   await ensureNetwork();
-  setActivity(`${label} awaiting confirmation`, "Review the network, contract action, and fee in OKX Wallet.");
+  const baseTransaction = {
+    from: account,
+    ...(contractAddress ? { to: contractAddress } : {}),
+    data,
+    value: "0x0"
+  };
+  setActivity(`${label} preflight`, "Estimating gas against the official X Layer Testnet RPC.");
+  const { transaction, gasLimit, maximumFee } = await prepareTransaction(baseTransaction);
+  setActivity(
+    `${label} awaiting confirmation`,
+    `Review X Layer Testnet, zero value, gas limit ${gasLimit}, and a maximum estimated fee of ${formatNative(maximumFee)} OKB.`
+  );
   const hash = await provider.request({
     method: "eth_sendTransaction",
-    params: [{ from: account, ...(contractAddress ? { to: contractAddress } : {}), data }]
+    params: [transaction]
   });
   setActivity(`${label} submitted`, "Waiting for X Layer confirmation.", explorerUrl("tx", hash));
   const receipt = await waitForReceipt(hash);
