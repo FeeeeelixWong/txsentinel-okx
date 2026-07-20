@@ -204,6 +204,15 @@ async function waitForReceipt(hash, timeoutMs = 180000) {
   throw new Error("Transaction confirmation timed out. Check the explorer before retrying.");
 }
 
+async function waitForCondition(check, timeoutMs = 60000) {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (await check()) return true;
+    await new Promise((resolve) => window.setTimeout(resolve, 1500));
+  }
+  return false;
+}
+
 async function sendTransaction(data, label) {
   await ensureNetwork();
   const baseTransaction = {
@@ -218,13 +227,36 @@ async function sendTransaction(data, label) {
     `${label} awaiting confirmation`,
     `Review X Layer Testnet, zero value, gas limit ${gasLimit}, and a maximum estimated fee of ${formatNative(maximumFee)} OKB.`
   );
-  const hash = await provider.request({
-    method: "eth_sendTransaction",
-    params: [transaction]
-  });
+  const startingNonce = BigInt(await directRpc("eth_getTransactionCount", [account, "latest"]));
+  const walletRequest = provider.request({ method: "eth_sendTransaction", params: [transaction] })
+    .then((hash) => ({ hash }));
+  const walletResult = await Promise.race([
+    walletRequest,
+    new Promise((resolve) => window.setTimeout(() => resolve(null), 15000))
+  ]);
+
+  if (!walletResult) {
+    setActivity(
+      `${label} callback delayed`,
+      "OKX Wallet has not returned a transaction hash. Checking X Layer directly; do not retry this action."
+    );
+    const broadcastDetected = await waitForCondition(async () => {
+      const currentNonce = BigInt(await directRpc("eth_getTransactionCount", [account, "latest"]));
+      return currentNonce > startingNonce;
+    });
+    if (!broadcastDetected) {
+      throw new Error("No confirmed transaction was detected after the wallet callback timed out. Check wallet activity before retrying.");
+    }
+    return { hash: "", receipt: null, recovered: true };
+  }
+
+  const hash = walletResult.hash;
+  if (!/^0x[0-9a-fA-F]{64}$/.test(hash || "")) {
+    throw new Error("OKX Wallet returned an invalid transaction hash. Check wallet activity before retrying.");
+  }
   setActivity(`${label} submitted`, "Waiting for X Layer confirmation.", explorerUrl("tx", hash));
   const receipt = await waitForReceipt(hash);
-  return { hash, receipt };
+  return { hash, receipt, recovered: false };
 }
 
 function decodePolicy(policyResult) {
@@ -239,6 +271,23 @@ function decodePolicy(policyResult) {
   };
 }
 
+async function readPolicy() {
+  const data = encodeCall("policies(address,bytes32)", [account, artifact.defaults.policyKey]);
+  const result = await directRpc("eth_call", [{ to: contractAddress, data }, "latest"]);
+  return decodePolicy(result);
+}
+
+async function receiptIsAnchored(receiptHash) {
+  const data = encodeCall("receipts(address,bytes32,bytes32)", [
+    account,
+    artifact.defaults.policyKey,
+    receiptHash
+  ]);
+  const result = await directRpc("eth_call", [{ to: contractAddress, data }, "latest"]);
+  const words = result.slice(2).match(/.{64}/g) || [];
+  return words.length >= 4 && BigInt(`0x${words[3]}`) !== 0n;
+}
+
 async function inspectContract() {
   if (!provider || !contractAddress) return;
   try {
@@ -247,9 +296,7 @@ async function inspectContract() {
     if (code.toLowerCase() !== artifact.deployedBytecode.toLowerCase()) {
       throw new Error("Canonical contract runtime bytecode does not match the reviewed artifact.");
     }
-    const data = encodeCall("policies(address,bytes32)", [account, artifact.defaults.policyKey]);
-    const result = await provider.request({ method: "eth_call", params: [{ to: contractAddress, data }, "latest"] });
-    const policy = decodePolicy(result);
+    const policy = await readPolicy();
     byId("policy-value").textContent = policy.registered
       ? `${policy.active ? "Active" : "Inactive"} / revision ${policy.revision}`
       : "Not registered";
@@ -268,9 +315,18 @@ async function registerPolicy() {
       artifact.defaults.policyHash,
       artifact.defaults.versionHash
     ]);
-    const { hash } = await sendTransaction(data, "Policy registration");
+    const { hash, recovered } = await sendTransaction(data, "Policy registration");
+    if (recovered && !(await waitForCondition(async () => (await readPolicy()).registered))) {
+      throw new Error("A transaction was confirmed, but the policy registration was not found. Do not retry before checking wallet activity.");
+    }
     byId("policy-value").textContent = "Active / revision 1";
-    setActivity("Policy registered", "TxSentinel policy v1 is active and owned by the connected wallet.", explorerUrl("tx", hash));
+    setActivity(
+      recovered ? "Policy registration recovered" : "Policy registered",
+      recovered
+        ? "The wallet callback was lost, but policy v1 was confirmed directly from the canonical contract."
+        : "TxSentinel policy v1 is active and owned by the connected wallet.",
+      recovered ? explorerUrl("address", contractAddress) : explorerUrl("tx", hash)
+    );
   } catch (error) {
     setActivity("Policy registration not completed", error?.message || "The transaction failed.", "", true);
   } finally {
@@ -326,9 +382,18 @@ async function anchorReceipt() {
       latestReceipt.actionDigest,
       decisions[latestReceipt.decision]
     ]);
-    const { hash } = await sendTransaction(data, "Receipt anchor");
+    const { hash, recovered } = await sendTransaction(data, "Receipt anchor");
+    if (recovered && !(await waitForCondition(() => receiptIsAnchored(latestReceipt.receiptHash)))) {
+      throw new Error("A transaction was confirmed, but the receipt anchor was not found. Do not retry before checking wallet activity.");
+    }
     byId("receipt-value").textContent = `${latestReceipt.decision} / anchored`;
-    setActivity("Receipt anchored on X Layer", `${latestReceipt.receiptHash} is now independently verifiable.`, explorerUrl("tx", hash));
+    setActivity(
+      recovered ? "Receipt anchor recovered" : "Receipt anchored on X Layer",
+      recovered
+        ? `${latestReceipt.receiptHash} was confirmed directly from the canonical contract after a lost wallet callback.`
+        : `${latestReceipt.receiptHash} is now independently verifiable.`,
+      recovered ? explorerUrl("address", contractAddress) : explorerUrl("tx", hash)
+    );
   } catch (error) {
     setActivity("Receipt anchor not completed", error?.message || "The transaction failed.", "", true);
   } finally {
