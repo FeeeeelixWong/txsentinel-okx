@@ -142,13 +142,15 @@ npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 | 官方 OKX x402 中间件与 EVM 方案 | ✅ 已完成 |
 | 公开付费接口 | ✅ 已部署至 [`/api/check-paid`](https://txsentinel-okx.vercel.app/api/check-paid) |
 | X Layer 测试网配置（`eip155:1952`） | ✅ 已完成 |
-| Vercel 中的 OKX Developer Portal API 凭证 | ⏳ 待配置 |
-| `PAY_TO_ADDRESS` EVM 收款地址 | ⏳ 待配置 |
+| Vercel 中的 OKX Developer Portal API 凭证 | ✅ 已作为加密生产环境变量配置 |
+| `PAY_TO_ADDRESS` EVM 收款地址 | ✅ 已出现在线上 402 challenge 中 |
+| OKX Wallet 浏览器买方流程 | ✅ 已上线至 [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
 | 买方钱包中的 X Layer 测试网 USD₮0 | ⏳ 待准备 |
-| 结算交易哈希与 `PAYMENT-RESPONSE` 证据 | ⏳ 最终验证 |
+| 结算交易哈希与 `PAYMENT-RESPONSE` 证据 | ⏳ 需要买方确认一次测试支付 |
 
-三个配置条件齐备后，重新部署服务，再用 Agentic Wallet 跑通
-`402 → 签名 → 重试 → 结算` 即可。具体步骤参考
+打开 `/integrate.html` 中的在线结算实验区，即可用 OKX Wallet 跑通
+`402 → 签名 → 重试 → 结算`。页面会先检查买方的 X Layer 测试网 USD₮0
+余额，满足要求后才会开启明确的支付确认按钮。具体步骤参考
 [OKX 官方卖方 SDK 指南](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk)。
 
 ## 🔗 X Layer 凭证锚定
@@ -230,4 +232,6 @@ test/                 策略和 HTTP 合约测试
 - ✅ 在线策略产品和公开 API：已完成
 - ✅ ASP `#6828` 激活与上架审核：已提交
 - ✅ 官方 x402 服务端集成：已实现
-- ⏳ 真实 x402 结算：配置 facilitator 凭证、`PAY_TO_ADDRESS` 和测试网 USD₮0 后即可启动
+- ✅ x402 卖方配置：facilitator 凭证和 `PAY_TO_ADDRESS` 已在线
+- ✅ 浏览器买方流程：报价、OKX Wallet 连接、余额检查、签名、重试和回执展示已实现
+- ⏳ 真实 x402 结算证明：等待一个持有 X Layer 测试网 USD₮0 的买方钱包确认测试支付

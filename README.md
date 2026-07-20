@@ -136,13 +136,15 @@ The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainne
 | Official OKX x402 middleware and EVM scheme | ✅ Implemented |
 | Public paid endpoint | ✅ Deployed at [`/api/check-paid`](https://txsentinel-okx.vercel.app/api/check-paid) |
 | X Layer Testnet configuration (`eip155:1952`) | ✅ Implemented |
-| OKX Developer Portal API credentials in Vercel | ⏳ Required |
-| EVM receiving address in `PAY_TO_ADDRESS` | ⏳ Required |
+| OKX Developer Portal API credentials in Vercel | ✅ Configured as encrypted production variables |
+| EVM receiving address in `PAY_TO_ADDRESS` | ✅ Present in the live 402 challenge |
+| Browser buyer flow with OKX Wallet | ✅ Live on [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
 | Buyer wallet funded with X Layer Testnet USD₮0 | ⏳ Required |
-| Settled transaction hash and `PAYMENT-RESPONSE` evidence | ⏳ Final verification |
+| Settled transaction hash and `PAYMENT-RESPONSE` evidence | ⏳ Requires one buyer-confirmed test payment |
 
-Once the three configuration requirements are supplied, redeploy the service and run the documented
-`402 → sign → retry → settle` flow with Agentic Wallet. See the
+Open the live settlement lab on `/integrate.html` to run the documented
+`402 → sign → retry → settle` flow with OKX Wallet. The page checks the buyer's X Layer
+Testnet USD₮0 balance before enabling the explicit payment confirmation. See the
 [official OKX seller SDK guide](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk).
 
 ## 🔗 X Layer Receipt Anchor
@@ -227,4 +229,6 @@ test/                 Policy and HTTP contract tests
 - ✅ Live policy product and public API: complete
 - ✅ ASP `#6828` activation and listing review: submitted
 - ✅ Official x402 server integration: implemented
-- ⏳ Real x402 settlement: ready to activate after facilitator credentials, `PAY_TO_ADDRESS`, and testnet USD₮0 are supplied
+- ✅ x402 seller configuration: facilitator credentials and `PAY_TO_ADDRESS` are live
+- ✅ Browser buyer flow: quote, OKX Wallet connection, balance check, signing, retry, and receipt rendering are implemented
+- ⏳ Real x402 settlement proof: waiting for one buyer wallet with X Layer Testnet USD₮0 to confirm the test payment

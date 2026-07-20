@@ -38,6 +38,54 @@
         </div>
       </section>
 
+      <section class="x402-payment-section process-section" aria-labelledby="x402-payment-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">LIVE SETTLEMENT LAB</p>
+            <h2 id="x402-payment-heading">Complete a real x402 policy check</h2>
+          </div>
+          <p>Official OKX client SDK, X Layer Testnet, and an EIP-3009 wallet signature. TxSentinel never receives a private key.</p>
+        </div>
+
+        <div class="payment-lab-grid">
+          <div class="tool-panel payment-control-panel">
+            <ol class="payment-progress" aria-label="Payment progress">
+              <li id="payment-step-quote" class="active"><span>01</span><div><strong>Payment terms</strong><small>Load the live 402 challenge</small></div></li>
+              <li id="payment-step-wallet"><span>02</span><div><strong>Buyer wallet</strong><small>Connect on X Layer Testnet</small></div></li>
+              <li id="payment-step-sign"><span>03</span><div><strong>Authorize</strong><small>Confirm the exact amount</small></div></li>
+              <li id="payment-step-receipt"><span>04</span><div><strong>Receipt</strong><small>Verify the settlement proof</small></div></li>
+            </ol>
+
+            <div class="payment-actions">
+              <button id="x402-load-quote" class="secondary-command" type="button">Load live terms</button>
+              <button id="x402-connect" class="secondary-command" type="button" disabled>Connect OKX Wallet</button>
+              <button id="x402-pay" class="primary-command" type="button" disabled><span>Confirm payment</span><b>USD₮0</b></button>
+            </div>
+
+            <div id="x402-message" class="payment-message" role="status" aria-live="polite">
+              Load the live terms before connecting a buyer wallet.
+            </div>
+            <a id="x402-faucet" class="payment-faucet hidden" href="https://web3.okx.com/xlayer/faucet/xlayerfaucet" target="_blank" rel="noreferrer">Get X Layer test funds <span aria-hidden="true">→</span></a>
+          </div>
+
+          <div class="tool-panel payment-proof-panel">
+            <div class="panel-title">
+              <div><p class="section-label">VERIFIABLE TERMS</p><h3 id="x402-proof-title">Awaiting challenge</h3></div>
+              <span id="x402-proof-badge" class="decision-badge hold">PENDING</span>
+            </div>
+            <dl class="receipt-facts payment-facts">
+              <div><dt>Network</dt><dd id="x402-network">—</dd></div>
+              <div><dt>Token / amount</dt><dd id="x402-amount">—</dd></div>
+              <div><dt>Pay to</dt><dd id="x402-pay-to">—</dd></div>
+              <div><dt>Buyer</dt><dd id="x402-buyer">—</dd></div>
+              <div><dt>Buyer balance</dt><dd id="x402-balance">—</dd></div>
+              <div><dt>Transaction</dt><dd id="x402-transaction">—</dd></div>
+            </dl>
+            <a id="x402-explorer" class="secondary-link payment-explorer hidden" href="#" target="_blank" rel="noreferrer">Open settlement on explorer</a>
+          </div>
+        </div>
+      </section>
+
       <section class="integration-runbook" aria-labelledby="integration-heading">
         <div class="section-heading"><div><p class="section-label">INTEGRATION RUNBOOK</p><h2 id="integration-heading">Four steps in the agent loop</h2></div></div>
         <ol class="vertical-steps">
@@ -77,5 +125,6 @@
     <footer><span>TxSentinel / agent integration</span><a href="/evaluate.html">Try the live evaluator</a></footer>
     <script src="/site.js" defer></script>
     <script src="/integrate.js" defer></script>
+    <script src="/x402-browser.js" defer></script>
   </body>
 </html>
