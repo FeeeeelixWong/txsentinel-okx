@@ -4,9 +4,53 @@ TxSentinel is a deterministic transaction policy firewall for autonomous agents.
 
 - Live product: [txsentinel-okx.vercel.app](https://txsentinel-okx.vercel.app)
 - Free review API: [txsentinel-okx.vercel.app/api/check](https://txsentinel-okx.vercel.app/api/check)
-- X Layer deployment console: [txsentinel-okx.vercel.app/onchain.html](https://txsentinel-okx.vercel.app/onchain.html)
+- X Layer onchain console: [txsentinel-okx.vercel.app/onchain.html](https://txsentinel-okx.vercel.app/onchain.html)
 - ASP candidate: `TxSentinel #6828`, listing review submitted
 - Hackathon: OKX.AI Genesis Hackathon
+
+**Start here:** [Visual product guide](docs/VISUAL_GUIDE.md) · [Architecture](ARCHITECTURE.md) · [API contract](docs/API.md)
+
+## Product in One Picture
+
+```mermaid
+flowchart LR
+  A["Agent proposes an action"] --> B["TxSentinel checks<br/>policy + evidence"]
+  B --> C{"Decision"}
+  C -->|"ALLOW"| D["Wallet may execute"]
+  C -->|"HOLD"| E["Human review"]
+  C -->|"DENY"| F["Stop"]
+  C --> G["Deterministic receipt"]
+  G -->|"OKX Wallet attestation"| H["X Layer<br/>Policy Anchor"]
+```
+
+TxSentinel runs **after an action is constructed but before it is signed**. The policy decision is
+made offchain for speed and explainability. A wallet can then anchor the receipt to X Layer for
+independent evidence without giving the contract custody or execution authority.
+
+## What Is Onchain?
+
+```mermaid
+sequenceDiagram
+  actor U as Policy owner
+  participant T as TxSentinel API
+  participant W as OKX Wallet
+  participant C as X Layer Anchor
+
+  Note over W,C: One-time policy setup
+  U->>W: Confirm Policy v1
+  W->>C: registerPolicy(policyKey, policyHash, versionHash)
+  C-->>W: PolicyRegistered
+
+  Note over U,C: Repeated for actions that need evidence
+  U->>T: Proposed action + policy + simulation evidence
+  T-->>U: ALLOW / HOLD / DENY + receiptHash
+  U->>W: Confirm receipt attestation
+  W->>C: anchorReceipt(receiptHash, actionDigest, decision)
+  C-->>W: ReceiptAnchored
+```
+
+`registerPolicy` does not approve tokens or move funds. It binds a wallet to a policy hash and
+revision. `anchorReceipt` stores evidence of a decision; it does not execute the underlying action.
 
 ## Why It Exists
 
@@ -45,6 +89,17 @@ The endpoint also accepts an empty POST and evaluates a documented review sample
 | `DENY` | The action violates a hard boundary | Unsupported chain, blocked recipient, revert, unlimited approval |
 
 Supported chains are X Layer, Ethereum, Base, and Solana. Supported operations are transfer, swap, token approval, and contract call.
+
+## Policy Ownership
+
+| Layer | Controlled by | Examples |
+| --- | --- | --- |
+| User policy | Policy owner | Spend cap, recipient lists, simulation requirement, slippage and fee limits |
+| System safety rails | TxSentinel | Strict schema, supported operations, non-negative values, deterministic normalization |
+| Onchain snapshot | X Layer contract | Owner, policy hash, version, revision, active status, anchored receipts |
+
+The current onchain demo registers a reviewed canonical Policy v1. A later policy update increments
+the revision; receipts already anchored against an older revision do not change.
 
 ## OKX Integration
 

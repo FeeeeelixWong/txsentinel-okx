@@ -17,6 +17,33 @@ flowchart LR
 
 TxSentinel is placed before signing. It receives only a proposed action, policy constraints, and optional simulation evidence. It never receives a private key and exposes no signing or transaction-submission method.
 
+For a product-first walkthrough, see [docs/VISUAL_GUIDE.md](docs/VISUAL_GUIDE.md).
+
+## Component Responsibilities
+
+```mermaid
+flowchart TB
+  UI["Product console"] --> API["Free or x402 API boundary"]
+  AGENT["Agent integration"] --> API
+  API --> VALIDATE["Strict schema validation"]
+  VALIDATE --> ENGINE["Pure deterministic policy engine"]
+  ENGINE --> RECEIPT["Decision + reasons + stable hashes"]
+  RECEIPT --> UI
+  RECEIPT --> AGENT
+  RECEIPT --> WALLET["OKX Wallet confirmation"]
+  WALLET --> ANCHOR["Canonical X Layer Policy Anchor"]
+
+  SIM["Supplied simulation evidence"] --> VALIDATE
+  POLICY["Owner policy settings"] --> VALIDATE
+```
+
+| Component | Responsibility | State |
+| --- | --- | --- |
+| API boundary | Validate transport input and expose free or paid access | Stateless |
+| Policy engine | Normalize and deterministically evaluate one proposal | Pure and stateless |
+| OKX Wallet | Keep keys outside TxSentinel and confirm chain writes | User-controlled |
+| X Layer anchor | Store policy and receipt snapshots | Immutable historical state |
+
 ## Deterministic Receipt
 
 The policy engine normalizes the action, sorts policy lists, evaluates rules in a fixed order, and hashes canonical JSON. The wall-clock `evaluatedAt` timestamp is added by the HTTP layer and excluded from the receipt, so equivalent normalized inputs produce the same `actionDigest` and `receiptHash`.
@@ -69,6 +96,29 @@ The anchor is an attestation. It proves who submitted which evidence and when; i
 EVM re-executed the offchain rules or authorized an asset transfer. A production enforcement path
 can add a Safe module or ERC-4337 validator that checks an active, authorized receipt before wallet
 execution.
+
+### Storage relationships
+
+```mermaid
+flowchart LR
+  OWNER["owner address"] --> POLICY["policies owner + policyKey"]
+  KEY["policyKey"] --> POLICY
+  POLICY --> CURRENT["policyHash + versionHash<br/>revision + active"]
+  POLICY --> RECEIPTS["receipts owner + policyKey + receiptHash"]
+  RECEIPTS --> SNAPSHOT["actionDigest + decision<br/>policy snapshot + submitter + time"]
+  OWNER --> DELEGATE["policy-scoped delegate"]
+  DELEGATE -->|"authorized anchor only"| RECEIPTS
+```
+
+### Version behavior
+
+```mermaid
+flowchart LR
+  V1["Policy revision 1"] --> R1["Receipt stores revision 1"]
+  V1 -->|"updatePolicy"| V2["Policy revision 2"]
+  V2 --> R2["Receipt stores revision 2"]
+  V2 -. "cannot mutate" .-> R1
+```
 
 ### Pre-deployment review
 
