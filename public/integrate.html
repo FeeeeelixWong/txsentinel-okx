@@ -44,7 +44,7 @@
             <p class="section-label">LIVE SETTLEMENT LAB</p>
             <h2 id="x402-payment-heading">Complete a real x402 policy check</h2>
           </div>
-          <p>Official OKX client SDK, X Layer Testnet, and an EIP-3009 wallet signature. TxSentinel never receives a private key.</p>
+          <p>Official OKX client SDK, X Layer Testnet, and an EIP-3009 wallet signature. Choose test USD₮0, USDG, or USDC from the official faucet. TxSentinel never receives a private key.</p>
         </div>
 
         <div class="payment-lab-grid">
@@ -56,10 +56,17 @@
               <li id="payment-step-receipt"><span>04</span><div><strong>Receipt</strong><small>Verify the settlement proof</small></div></li>
             </ol>
 
+            <fieldset class="payment-token-picker">
+              <legend>Payment asset</legend>
+              <label><input type="radio" name="x402-token" value="TEST_USDT0" checked /><span><b>test USD₮0</b><small>Testnet</small></span></label>
+              <label><input type="radio" name="x402-token" value="USDG" /><span><b>test USDG</b><small>Testnet</small></span></label>
+              <label><input type="radio" name="x402-token" value="USDC" /><span><b>test USDC</b><small>Testnet</small></span></label>
+            </fieldset>
+
             <div class="payment-actions">
               <button id="x402-load-quote" class="secondary-command" type="button">Load live terms</button>
               <button id="x402-connect" class="secondary-command" type="button" disabled>Connect OKX Wallet</button>
-              <button id="x402-pay" class="primary-command" type="button" disabled><span>Confirm payment</span><b>USD₮0</b></button>
+              <button id="x402-pay" class="primary-command" type="button" disabled><span>Confirm payment</span><b id="x402-pay-token">test USD₮0</b></button>
             </div>
 
             <div id="x402-message" class="payment-message" role="status" aria-live="polite">

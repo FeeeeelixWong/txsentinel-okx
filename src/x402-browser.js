@@ -11,20 +11,38 @@ import {
   http
 } from "viem";
 
-const NETWORK = "eip155:1952";
-const CHAIN_ID = 1952;
-const CHAIN_HEX = "0x7a0";
-const RPC_URL = "https://testrpc.xlayer.tech/terigon";
-const EXPLORER_URL = "https://www.okx.com/web3/explorer/xlayer-test";
+const XLAYER_TESTNET = {
+  network: "eip155:1952",
+  rpcUrl: "https://testrpc.xlayer.tech/terigon",
+  explorerUrl: "https://www.okx.com/web3/explorer/xlayer-test",
+  faucetUrl: "https://web3.okx.com/xlayer/faucet/xlayerfaucet",
+  chain: defineChain({
+    id: 1952,
+    name: "X Layer Testnet",
+    nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
+    rpcUrls: { default: { http: ["https://testrpc.xlayer.tech/terigon"] } },
+    blockExplorers: { default: { name: "OKX Explorer", url: "https://www.okx.com/web3/explorer/xlayer-test" } },
+    testnet: true
+  })
+};
 
-const xLayerTestnet = defineChain({
-  id: CHAIN_ID,
-  name: "X Layer Testnet",
-  nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
-  rpcUrls: { default: { http: [RPC_URL] } },
-  blockExplorers: { default: { name: "OKX Explorer", url: EXPLORER_URL } },
-  testnet: true
-});
+const PAYMENT_TOKENS = {
+  TEST_USDT0: {
+    ...XLAYER_TESTNET,
+    asset: "0x9e29b3aada05bf2d2c827af80bd28dc0b9b4fb0c",
+    symbol: "test USD₮0"
+  },
+  USDG: {
+    ...XLAYER_TESTNET,
+    asset: "0xa78e2baabaf5c4f36b7fc394725deb68d332eec1",
+    symbol: "test USDG"
+  },
+  USDC: {
+    ...XLAYER_TESTNET,
+    asset: "0xcb8bf24c6ce16ad21d707c9505421a17f2bec79d",
+    symbol: "test USDC"
+  }
+};
 
 const policyRequest = {
   chain: "xlayer",
@@ -46,6 +64,8 @@ const elements = {
   quoteButton: document.getElementById("x402-load-quote"),
   connectButton: document.getElementById("x402-connect"),
   payButton: document.getElementById("x402-pay"),
+  payToken: document.getElementById("x402-pay-token"),
+  tokenInputs: [...document.querySelectorAll('input[name="x402-token"]')],
   message: document.getElementById("x402-message"),
   faucet: document.getElementById("x402-faucet"),
   title: document.getElementById("x402-proof-title"),
@@ -69,6 +89,15 @@ let accepted;
 let provider;
 let buyerAddress;
 let buyerBalance = 0n;
+
+function selectedToken() {
+  const key = elements.tokenInputs.find((input) => input.checked)?.value || "TEST_USDT0";
+  return PAYMENT_TOKENS[key];
+}
+
+function displaySymbol(requirement = accepted) {
+  return requirement?.extra?.symbol || requirement?.extra?.name || selectedToken().symbol;
+}
 
 function shorten(value, leading = 8, trailing = 6) {
   if (!value || value.length <= leading + trailing + 3) return value || "—";
@@ -116,19 +145,20 @@ function getWalletProvider() {
   return injected;
 }
 
-async function switchToXLayer(injectedProvider) {
+async function switchToXLayer(injectedProvider, token) {
+  const chainHex = `0x${token.chain.id.toString(16)}`;
   try {
-    await injectedProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] });
+    await injectedProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainHex }] });
   } catch (error) {
     if (error?.code !== 4902 && error?.code !== -32603) throw error;
     await injectedProvider.request({
       method: "wallet_addEthereumChain",
       params: [{
-        chainId: CHAIN_HEX,
-        chainName: xLayerTestnet.name,
-        nativeCurrency: xLayerTestnet.nativeCurrency,
-        rpcUrls: [RPC_URL],
-        blockExplorerUrls: [EXPLORER_URL]
+        chainId: chainHex,
+        chainName: token.chain.name,
+        nativeCurrency: token.chain.nativeCurrency,
+        rpcUrls: [token.rpcUrl],
+        blockExplorerUrls: [token.explorerUrl]
       }]
     });
   }
@@ -154,18 +184,24 @@ async function loadQuote() {
     }
 
     const paymentRequired = decodeHeader(encoded);
-    accepted = paymentRequired.accepts?.find((option) => option.network === NETWORK && option.scheme === "exact");
+    const token = selectedToken();
+    accepted = paymentRequired.accepts?.find((option) => (
+      option.network === token.network
+      && option.scheme === "exact"
+      && option.asset?.toLowerCase() === token.asset
+    ));
     if (!accepted) throw new Error("The server did not offer the expected X Layer exact-payment option.");
 
     elements.title.textContent = "Live terms loaded";
     elements.badge.textContent = "402 READY";
     elements.badge.className = "decision-badge hold";
-    elements.network.textContent = `${accepted.network} / exact`;
-    elements.amount.textContent = `${tokenAmount(accepted)} ${accepted.extra?.name || "USD₮0"}`;
+    elements.network.textContent = `${token.chain.name} / ${accepted.network}`;
+    elements.amount.textContent = `${tokenAmount(accepted)} ${displaySymbol(accepted)}`;
     elements.payTo.textContent = shorten(accepted.payTo);
     elements.payTo.title = accepted.payTo;
     elements.connectButton.disabled = false;
     elements.payButton.querySelector("span").textContent = `Confirm ${tokenAmount(accepted)} payment`;
+    elements.payToken.textContent = displaySymbol(accepted);
     setStep(1);
     setMessage("Terms loaded. Connect a buyer wallet to verify its network and test-token balance.");
   } catch (error) {
@@ -180,12 +216,13 @@ async function connectWallet() {
   setMessage("Waiting for the wallet connection and network confirmation.");
   try {
     provider = getWalletProvider();
+    const token = selectedToken();
     const accounts = await provider.request({ method: "eth_requestAccounts" });
     if (!accounts?.[0]) throw new Error("No wallet account was returned.");
-    await switchToXLayer(provider);
+    await switchToXLayer(provider, token);
     buyerAddress = getAddress(accounts[0]);
 
-    const publicClient = createPublicClient({ chain: xLayerTestnet, transport: http(RPC_URL) });
+    const publicClient = createPublicClient({ chain: token.chain, transport: http(token.rpcUrl) });
     buyerBalance = await publicClient.readContract({
       address: getAddress(accepted.asset),
       abi: erc20Abi,
@@ -197,16 +234,17 @@ async function connectWallet() {
     const hasFunds = buyerBalance >= BigInt(accepted.amount);
     elements.buyer.textContent = shorten(buyerAddress);
     elements.buyer.title = buyerAddress;
-    elements.balance.textContent = `${formatUnits(buyerBalance, decimals)} ${accepted.extra?.name || "USD₮0"}`;
+    elements.balance.textContent = `${formatUnits(buyerBalance, decimals)} ${displaySymbol()}`;
     elements.connectButton.textContent = "Wallet connected";
     elements.connectButton.dataset.idleLabel = "Wallet connected";
     elements.payButton.disabled = !hasFunds;
-    elements.faucet.classList.toggle("hidden", hasFunds);
+    elements.faucet.classList.toggle("hidden", hasFunds || !token.faucetUrl);
+    if (token.faucetUrl) elements.faucet.href = token.faucetUrl;
     setStep(2);
     setMessage(
       hasFunds
         ? "Wallet is ready. The next button is the payment confirmation gate; OKX Wallet will ask for the EIP-3009 signature."
-        : `Insufficient test-token balance. This payment requires ${tokenAmount(accepted)} ${accepted.extra?.name || "USD₮0"}.`,
+        : `Insufficient balance on ${token.chain.name}. This payment requires ${tokenAmount(accepted)} ${displaySymbol()}.`,
       hasFunds ? "" : "error"
     );
   } catch (error) {
@@ -225,10 +263,11 @@ async function payAndRun() {
   payLabel.textContent = "Signing in wallet…";
   setMessage("Review and approve the exact payment authorization in OKX Wallet.");
   try {
-    await switchToXLayer(provider);
+    const token = selectedToken();
+    await switchToXLayer(provider, token);
     const walletClient = createWalletClient({
       account: buyerAddress,
-      chain: xLayerTestnet,
+      chain: token.chain,
       transport: custom(provider)
     });
     const signer = {
@@ -236,7 +275,11 @@ async function payAndRun() {
       signTypedData: (typedData) => walletClient.signTypedData({ ...typedData, account: buyerAddress })
     };
     const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
-      schemes: [{ network: NETWORK, client: new ExactEvmScheme(signer) }]
+      schemes: [{ network: token.network, client: new ExactEvmScheme(signer) }],
+      policies: [(_version, requirements) => requirements.filter((requirement) => (
+        requirement.network === token.network
+        && requirement.asset?.toLowerCase() === token.asset
+      ))]
     });
     const response = await fetchWithPayment("/api/check-paid", requestOptions());
     const responseBody = await response.json().catch(() => ({}));
@@ -255,7 +298,7 @@ async function payAndRun() {
     elements.transaction.textContent = shorten(transaction || "Receipt returned");
     elements.transaction.title = transaction || JSON.stringify(receipt);
     if (transaction) {
-      elements.explorer.href = `${EXPLORER_URL}/tx/${transaction}`;
+      elements.explorer.href = `${token.explorerUrl}/tx/${transaction}`;
       elements.explorer.classList.remove("hidden");
     }
     setStep(4);
@@ -269,6 +312,29 @@ async function payAndRun() {
   }
 }
 
+function resetForTokenChange() {
+  const token = selectedToken();
+  accepted = undefined;
+  buyerAddress = undefined;
+  buyerBalance = 0n;
+  elements.connectButton.disabled = true;
+  elements.connectButton.textContent = "Connect OKX Wallet";
+  elements.connectButton.dataset.idleLabel = "Connect OKX Wallet";
+  elements.payButton.disabled = true;
+  elements.payButton.querySelector("span").textContent = "Confirm payment";
+  elements.payToken.textContent = token.symbol;
+  elements.faucet.classList.add("hidden");
+  elements.title.textContent = "Awaiting challenge";
+  elements.badge.textContent = "PENDING";
+  elements.badge.className = "decision-badge hold";
+  [elements.network, elements.amount, elements.payTo, elements.buyer, elements.balance, elements.transaction]
+    .forEach((element) => { element.textContent = "—"; });
+  elements.explorer.classList.add("hidden");
+  setStep(0);
+  setMessage(`Load live terms for ${token.symbol} on ${token.chain.name}.`);
+}
+
 elements.quoteButton?.addEventListener("click", loadQuote);
 elements.connectButton?.addEventListener("click", connectWallet);
 elements.payButton?.addEventListener("click", payAndRun);
+elements.tokenInputs.forEach((input) => input.addEventListener("change", resetForTokenChange));

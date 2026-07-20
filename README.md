@@ -127,7 +127,15 @@ npx vercel@53.4.0 env add OKX_PASSPHRASE production
 npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 ```
 
-The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainnet (`eip155:196`) only after end-to-end testnet settlement evidence exists.
+The endpoint advertises three explicit choices in one standard `accepts[]` challenge: test USD₮0, test USDG, and test USDC on X Layer Testnet (`eip155:1952`). All three assets are distributed by the official X Layer faucet, and every payment requires a fresh, explicit wallet confirmation.
+
+| Test asset | Contract | EIP-712 domain | Decimals |
+| --- | --- | --- | ---: |
+| USD₮0 | [`0x9e29…fb0c`](https://web3.okx.com/explorer/x-layer-testnet/address/0x9e29b3aada05bf2d2c827af80bd28dc0b9b4fb0c) | `USD₮0` / `1` | 6 |
+| USDG | [`0xa78e…eec1`](https://web3.okx.com/explorer/x-layer-testnet/address/0xa78e2baabaf5c4f36b7fc394725deb68d332eec1) | `Global Dollar` / `1` | 6 |
+| USDC | [`0xcb8b…c79d`](https://web3.okx.com/explorer/x-layer-testnet/address/0xcb8bf24c6ce16ad21d707c9505421a17f2bec79d) | `USDC_TEST` / `2` | 6 |
+
+The addresses were verified from the [official faucet contract's outgoing token transfers](https://web3.okx.com/explorer/x-layer-testnet/address/0xf6d088123a3c17e6047ae9338b8cf072ad448907), not inferred from wallet holdings.
 
 ### Settlement readiness
 
@@ -136,6 +144,7 @@ The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainne
 | Official OKX x402 middleware and EVM scheme | ✅ Implemented |
 | Public paid endpoint | ✅ Deployed at [`/api/check-paid`](https://txsentinel-okx.vercel.app/api/check-paid) |
 | X Layer Testnet configuration (`eip155:1952`) | ✅ Implemented |
+| X Layer Testnet USD₮0, USDG, and USDC options (`eip155:1952`) | ✅ Implemented |
 | OKX Developer Portal API credentials in Vercel | ✅ Configured as encrypted production variables |
 | EVM receiving address in `PAY_TO_ADDRESS` | ✅ Present in the live 402 challenge |
 | Browser buyer flow with OKX Wallet | ✅ Live on [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
@@ -143,9 +152,9 @@ The default network is X Layer testnet (`eip155:1952`). Switch to X Layer mainne
 | Settled transaction hash and `PAYMENT-RESPONSE` evidence | ⏳ Requires one buyer-confirmed test payment |
 
 Open the live settlement lab on `/integrate.html` to run the documented
-`402 → sign → retry → settle` flow with OKX Wallet. The page checks the buyer's X Layer
-Testnet USD₮0 balance before enabling the explicit payment confirmation. See the
-[official OKX seller SDK guide](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk).
+`402 → select asset → check balance → sign → retry → settle` flow with OKX Wallet. The page
+checks the balance of the selected token and network before enabling the explicit payment confirmation. See the
+[official OKX seller SDK guide](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk) and [X Layer faucet](https://web3.okx.com/xlayer/faucet/xlayerfaucet).
 
 ## 🔗 X Layer Receipt Anchor
 

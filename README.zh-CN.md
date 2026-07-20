@@ -132,8 +132,17 @@ npx vercel@53.4.0 env add OKX_PASSPHRASE production
 npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 ```
 
-默认网络为 X Layer 测试网（`eip155:1952`）。只有在测试网完成端到端结算验证后，
-才应切换到 X Layer 主网（`eip155:196`）。
+接口在同一个标准 `accepts[]` challenge 中提供三种明确选择：X Layer 测试网
+（`eip155:1952`）的 test USD₮0、test USDG 和 test USDC。三种资产都可从
+X Layer 官方水龙头领取，每次支付都必须由钱包重新明确确认。
+
+| 测试资产 | 合约 | EIP-712 域 | 精度 |
+| --- | --- | --- | ---: |
+| USD₮0 | [`0x9e29…fb0c`](https://web3.okx.com/zh-hans/explorer/x-layer-testnet/address/0x9e29b3aada05bf2d2c827af80bd28dc0b9b4fb0c) | `USD₮0` / `1` | 6 |
+| USDG | [`0xa78e…eec1`](https://web3.okx.com/zh-hans/explorer/x-layer-testnet/address/0xa78e2baabaf5c4f36b7fc394725deb68d332eec1) | `Global Dollar` / `1` | 6 |
+| USDC | [`0xcb8b…c79d`](https://web3.okx.com/zh-hans/explorer/x-layer-testnet/address/0xcb8bf24c6ce16ad21d707c9505421a17f2bec79d) | `USDC_TEST` / `2` | 6 |
+
+这些地址来自[官方水龙头合约的实际代币转出记录](https://web3.okx.com/zh-hans/explorer/x-layer-testnet/address/0xf6d088123a3c17e6047ae9338b8cf072ad448907)，不是根据钱包持仓猜测。
 
 ### 真实结算准备度
 
@@ -142,6 +151,7 @@ npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 | 官方 OKX x402 中间件与 EVM 方案 | ✅ 已完成 |
 | 公开付费接口 | ✅ 已部署至 [`/api/check-paid`](https://txsentinel-okx.vercel.app/api/check-paid) |
 | X Layer 测试网配置（`eip155:1952`） | ✅ 已完成 |
+| X Layer 测试网 USD₮0、USDG 与 USDC 选项（`eip155:1952`） | ✅ 已完成 |
 | Vercel 中的 OKX Developer Portal API 凭证 | ✅ 已作为加密生产环境变量配置 |
 | `PAY_TO_ADDRESS` EVM 收款地址 | ✅ 已出现在线上 402 challenge 中 |
 | OKX Wallet 浏览器买方流程 | ✅ 已上线至 [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
@@ -149,9 +159,9 @@ npx vercel@53.4.0 env add PAY_TO_ADDRESS production
 | 结算交易哈希与 `PAYMENT-RESPONSE` 证据 | ⏳ 需要买方确认一次测试支付 |
 
 打开 `/integrate.html` 中的在线结算实验区，即可用 OKX Wallet 跑通
-`402 → 签名 → 重试 → 结算`。页面会先检查买方的 X Layer 测试网 USD₮0
-余额，满足要求后才会开启明确的支付确认按钮。具体步骤参考
-[OKX 官方卖方 SDK 指南](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk)。
+`402 → 选择币种 → 检查余额 → 签名 → 重试 → 结算`。页面会先检查所选网络和
+币种的余额，满足要求后才会开启明确的支付确认按钮。具体步骤参考
+[OKX 官方卖方 SDK 指南](https://web3.okx.com/zh-hans/onchainos/dev-docs/payments/service-seller-sdk)与 [X Layer 水龙头](https://web3.okx.com/xlayer/faucet/xlayerfaucet)。
 
 ## 🔗 X Layer 凭证锚定
 
