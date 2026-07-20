@@ -129,6 +129,48 @@ npm run contract:lint
 npm run contract:test
 ```
 
+## Policy FAQ
+
+### Can one wallet own multiple policies?
+
+Yes. Policies are stored under `(owner address, policyKey)`, so one wallet can register multiple
+independent policies by using different policy keys. Each policy has its own ruleset hash, version,
+revision, active status, delegates, and receipt history. Different wallets may also reuse the same
+application-defined policy key because each owner's namespace is isolated.
+
+### Can a policy be updated?
+
+Yes. The policy owner can call `updatePolicy` with a replacement policy hash and version hash. The
+contract increments the policy revision on every update. Updating an inactive policy does not
+automatically reactivate it.
+
+Previously anchored receipts remain unchanged after an update. Every receipt stores the policy
+hash, version hash, and revision that were active when that decision was anchored, preserving an
+auditable historical snapshot.
+
+### Who can update or disable a policy?
+
+Only the wallet that owns the policy can update it, change its active status, or manage delegates.
+A policy-scoped delegate may anchor receipts for that policy but cannot change its rules or status.
+
+### Does a policy expire automatically?
+
+No. The current contract has no automatic expiration timestamp. A registered policy remains active
+until its owner calls `setPolicyActive(policyKey, false)`. The owner may later reactivate it with
+`setPolicyActive(policyKey, true)`.
+
+### Can a policy be deleted or registered again under the same key?
+
+No. Onchain policy records are not deleted, and an existing `(owner, policyKey)` cannot be registered
+again. The owner should update the existing policy, deactivate it, or register a new policy under a
+different key. This prevents historical receipts from losing their policy identity.
+
+### Does the current web console expose all of these controls?
+
+Not yet. The deployed contract supports multiple policies, updates, activation controls, and
+policy-scoped delegates. The current hackathon console intentionally presents one reviewed canonical
+Policy v1 so the end-to-end registration and receipt flow stays easy to verify.
+
 ## Security
 
 TxSentinel is read-only. It rejects unknown top-level and policy fields, caps request size on the paid endpoint, never accepts a private key field, and cannot sign or broadcast transactions. Supplied simulation evidence is labeled as evidence, not represented as an RPC simulation performed by TxSentinel.
