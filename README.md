@@ -2,6 +2,8 @@
 
 # 🛡️ TxSentinel
 
+[![CI](https://github.com/FeeeeelixWong/txsentinel-okx/actions/workflows/ci.yml/badge.svg)](https://github.com/FeeeeelixWong/txsentinel-okx/actions/workflows/ci.yml)
+
 > A deterministic transaction policy firewall for autonomous agents.
 
 Before an agent signs an onchain action, TxSentinel evaluates its intent, policy limits, and supplied

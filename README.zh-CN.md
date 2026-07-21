@@ -2,6 +2,8 @@
 
 # 🛡️ TxSentinel
 
+[![CI](https://github.com/FeeeeelixWong/txsentinel-okx/actions/workflows/ci.yml/badge.svg)](https://github.com/FeeeeelixWong/txsentinel-okx/actions/workflows/ci.yml)
+
 > 面向自主智能体的确定性交易策略防火墙。
 
 在智能体签署链上操作之前，TxSentinel 会评估操作意图、策略限制和外部提供的模拟证据。
