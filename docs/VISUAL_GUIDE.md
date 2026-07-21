@@ -9,14 +9,17 @@ separately.
 ![Thirty-second mental model](assets/visual-mental-model.svg)
 
 The trigger is the moment after the agent knows what it wants to do but before a wallet signs the
-underlying transaction. TxSentinel never receives a private key and cannot broadcast that action.
+underlying transaction. Free preflight applies a basic subset and exposes only coarse readiness;
+`READY` is not equivalent to `ALLOW`. The formal paid route evaluates the complete policy and exposes
+the detailed deterministic receipt. TxSentinel never receives a private key and cannot broadcast.
 
 ## 2. One-Time Setup and Per-Action Flow
 
 ![One-time setup and per-action sequence](assets/visual-action-sequence.svg)
 
-The receipt-attestation transaction and the underlying asset transaction are deliberately separate.
-The current contract proves that an address attested to a decision; it does not enforce execution.
+Input validation and policy computation happen offchain before the x402 payment challenge. The
+receipt-attestation transaction and the underlying asset transaction are deliberately separate.
+The current contract proves that an address attested to a paid formal decision; it does not enforce execution.
 
 ## 3. Who Defines the Rules?
 
@@ -64,7 +67,8 @@ buyer flow.
 
 | Component | Can do | Cannot do |
 | --- | --- | --- |
-| TxSentinel API | Validate proposals, evaluate policy, produce deterministic hashes | Read a private key, sign, or broadcast |
+| Free preflight | Apply basic readiness checks and return READY, REVIEW, or BLOCKED | Return formal evidence, digest, receipt hash, or authorization to execute |
+| Formal x402 API | Validate before payment, then return detailed decision and stable hashes after settlement | Read a private key, sign, or broadcast |
 | OKX Wallet | Show and sign explicit user-approved transactions | Change the reviewed contract bytecode |
 | X Layer anchor | Store policy versions and immutable receipt snapshots | Hold assets, approve tokens, call target contracts, or execute the proposed action |
 | Agent | Propose actions and react to decisions | Bypass wallet confirmation through TxSentinel |
@@ -73,10 +77,10 @@ buyer flow.
 
 ![TxSentinel end-to-end x402 interaction](assets/x402-interaction-sequence.svg)
 
-This sequence joins the seller configuration, buyer request, OKX Wallet approval, official
-facilitator settlement, X Layer transfer, and TxSentinel policy response in one view. The service
-payment settles to the seller in steps 9–10. The optional receipt anchor in steps 13–14 is a
-separate evidence transaction and never executes the protected action.
+This sequence joins seller configuration, free readiness, prepayment validation, OKX Wallet
+approval, official facilitator settlement, X Layer transfer, and the formal policy response. Free
+preflight is steps 3–4. The service payment settles in steps 12–13. The optional paid-receipt anchor
+in steps 16–17 is a separate evidence transaction and never executes the protected action.
 
 ## 8. Current Onchain Evidence
 

@@ -14,14 +14,20 @@ For a product-first walkthrough, see [docs/VISUAL_GUIDE.md](docs/VISUAL_GUIDE.md
 
 | Component | Responsibility | State |
 | --- | --- | --- |
-| API boundary | Validate transport input and expose free or paid access | Stateless |
+| Free preflight boundary | Return coarse readiness without formal evidence or hashes | Stateless |
+| Formal x402 boundary | Validate before payment and gate the full deterministic result | Stateless |
 | Policy engine | Normalize and deterministically evaluate one proposal | Pure and stateless |
 | OKX Wallet | Keep keys outside TxSentinel and confirm chain writes | User-controlled |
 | X Layer anchor | Store policy and receipt snapshots | Immutable historical state |
 
 ## Deterministic Receipt
 
-The policy engine normalizes the action, sorts policy lists, evaluates rules in a fixed order, and hashes canonical JSON. The wall-clock `evaluatedAt` timestamp is added by the HTTP layer and excluded from the receipt, so equivalent normalized inputs produce the same `actionDigest` and `receiptHash`.
+The policy engine normalizes the action, sorts policy lists, evaluates rules in a fixed order, and
+hashes canonical JSON. Free preflight runs a smaller readiness screen and never computes or exposes
+a formal receipt. As a result, `READY` is not equivalent to `ALLOW`: recipient lists, contract
+verification, slippage, fees, and the full normalized policy remain part of the paid formal engine.
+The paid route returns the full result after settlement. Its wall-clock `evaluatedAt` timestamp is outside the receipt, so
+equivalent normalized inputs produce the same `actionDigest` and `receiptHash`.
 
 ```text
 actionDigest = SHA256(canonical(action + policy + evidence))
@@ -32,7 +38,7 @@ receiptHash  = SHA256(canonical(policyVersion + actionDigest + decision + reason
 
 | Input or component | Trust treatment |
 | --- | --- |
-| Agent request | Strict Zod schema, unknown fields rejected |
+| Agent request | Strict Zod schema, unknown fields rejected before x402 payment |
 | Policy values | Finite non-negative bounds and capped arrays |
 | Simulation evidence | Explicitly labeled as supplied evidence |
 | Decision engine | Pure synchronous function, no network dependency |
@@ -96,10 +102,12 @@ execution.
 
 ![TxSentinel end-to-end x402 interaction](docs/assets/x402-interaction-sequence.svg)
 
-The seller configures price, recipient, and accepted assets server-side. The buyer submits the
-protected action, approves the returned quote in OKX Wallet, and retries with payment proof. The
-official OKX facilitator verifies and settles the service payment on X Layer before TxSentinel
-returns the policy result and `PAYMENT-RESPONSE`.
+The seller configures price, recipient, and accepted assets server-side. A buyer may first call
+free preflight for non-binding readiness. A formal request is validated and evaluated offchain
+before the x402 middleware; malformed input stops with HTTP `422` and cannot trigger payment.
+Valid input receives the quote, the buyer approves it in OKX Wallet, and retries with payment proof.
+The official OKX facilitator settles the service fee on X Layer before TxSentinel reveals the
+formal policy result and `PAYMENT-RESPONSE`.
 
 The optional `anchorReceipt` call is a second, buyer-approved wallet transaction that stores only
 the deterministic receipt hash. Neither the x402 settlement nor receipt anchoring executes the
@@ -112,4 +120,7 @@ The official x402 server path is implemented in `api/check-paid.js`. It uses:
 - `ExactEvmScheme`
 - `paymentMiddleware`
 
-Without credentials it returns `503 X402_CONFIGURATION_REQUIRED`, while `GET /api/check-paid` publishes a machine-readable readiness report. With credentials, missing payment is handled by the official middleware and returns the protocol-standard HTTP 402 challenge.
+Without credentials a valid formal request returns `503 X402_CONFIGURATION_REQUIRED`, while
+`GET /api/check-paid` publishes a machine-readable readiness report. With credentials, validated
+requests without payment receive the protocol-standard HTTP 402 challenge. Invalid requests always
+fail before this payment boundary.

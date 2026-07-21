@@ -68,9 +68,9 @@
   <text x="474" y="477" class="body">No custody and no broadcast authority</text>
 
   <rect x="858" y="375" width="300" height="139" rx="7" class="panel"/>
-  <text x="882" y="409" class="label lime">DETERMINISTIC RESULT</text>
+  <text x="882" y="409" class="label lime">PAID FORMAL RESULT</text>
   <text x="882" y="444" class="heading">ALLOW / HOLD / DENY</text>
-  <text x="882" y="477" class="body">Policy receipt returned to the caller</text>
+  <text x="882" y="477" class="body">Returned only after x402 settlement</text>
 
   <path d="M342 445 H450" class="line"/>
   <path d="M750 445 H858" class="line"/>

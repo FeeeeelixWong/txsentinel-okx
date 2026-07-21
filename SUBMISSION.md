@@ -10,7 +10,7 @@ Agentic wallets can plan, pay, trade, and interact with contracts, but a transac
 
 ## Product
 
-TxSentinel turns those constraints into one pre-sign API. The agent submits a proposed action and receives a normalized policy snapshot, risk score, structured evidence, action digest, and deterministic receipt hash. Hard violations are denied, ambiguous cases are held for review, and compliant actions are allowed.
+TxSentinel turns those constraints into two deliberate pre-sign surfaces. A free preflight returns only coarse `READY`, `REVIEW`, or `BLOCKED` routing. When formal evidence is needed, the x402 route validates before payment and then returns a normalized policy snapshot, risk score, structured evidence, action digest, and deterministic receipt hash after settlement. Hard violations are denied, ambiguous cases are held for review, and compliant actions are allowed.
 
 ## Why OKX
 
@@ -22,19 +22,20 @@ TxSentinel turns those constraints into one pre-sign API. The agent submits a pr
 ## What Is Live
 
 - Interactive console: https://txsentinel-okx.vercel.app
-- Free policy API: https://txsentinel-okx.vercel.app/api/check
+- Free readiness preflight: https://txsentinel-okx.vercel.app/api/preflight
+- Formal x402 policy API: https://txsentinel-okx.vercel.app/api/check-paid
 - Source: https://github.com/FeeeeelixWong/txsentinel-okx
-- 20 automated policy, HTTP, and official x402 middleware tests
-- Deployment smoke for `ALLOW`, `HOLD`, `DENY`, validation, receipt determinism, and x402 readiness
+- 30 automated policy, preflight, contract, HTTP, and official x402 middleware tests
+- Deployment smoke for `READY`, `REVIEW`, `BLOCKED`, prepayment validation, and x402 readiness
 
 ## Judge Path
 
-1. Open the live console.
-2. Run **Routine transfer** and inspect the `ALLOW` receipt with risk `0`.
-3. Run **Spend cap breach** and inspect the `HOLD` evidence.
-4. Run **Unlimited approval** and inspect the `DENY` receipt with risk `100`.
-5. Change any policy value and run again to see the receipt hash change.
-6. Open the raw response or download the receipt JSON.
+1. Open the free preflight console.
+2. Run **Routine transfer** and inspect `READY` without any formal receipt material.
+3. Run **Spend cap breach** and inspect `REVIEW`.
+4. Run **Unlimited approval** and inspect `BLOCKED`.
+5. Open Integrate, load the live 402 terms, and complete the formal flow with OKX Wallet.
+6. Inspect the paid `ALLOW`, `HOLD`, or `DENY` result, deterministic hashes, and settlement proof.
 
 ## Innovation
 
@@ -42,11 +43,13 @@ TxSentinel separates transaction capability from transaction authority. It does 
 
 ## Current Proof and Remaining Activation
 
-The free API and policy console are live. The official x402 server integration is in the repository and exposes deployment readiness. A real x402 settlement requires OKX facilitator credentials, a receiving address, and a funded testnet payer; until those are configured, the product labels x402 as staged and makes no settlement claim.
+The free preflight and formal x402 API are live. Invalid formal requests fail before payment. Valid
+requests receive official OKX x402 terms, and a buyer with X Layer test assets can approve settlement
+in OKX Wallet before the detailed decision and deterministic receipt are revealed.
 
 ## Award Fit
 
-- **Best Product**: complete, judgeable workflow with receipts and downloadable evidence.
+- **Best Product**: complete, judgeable workflow with verifiable paid receipts and optional X Layer anchoring.
 - **Finance Copilot**: pre-sign controls for transfers, swaps, approvals, and contract calls.
 - **Software Utility**: reusable API boundary for any agent wallet or automation stack.
-- **Revenue Rocket**: official x402 pay-per-check path ready for credential activation.
+- **Revenue Rocket**: live official x402 pay-per-check path with three accepted X Layer test assets.

@@ -7,7 +7,8 @@ module.exports = function handler(_req, res) {
     version: "1.0.0",
     policyVersion: "txsentinel-1.0.0",
     endpoints: {
-      free: "/api/check",
+      preflight: "/api/preflight",
+      legacyPreflight: "/api/check",
       paid: "/api/check-paid"
     }
   });

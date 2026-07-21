@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Evaluate a proposed onchain action against deterministic TxSentinel guardrails." />
-    <title>TxSentinel | Evaluate action</title>
+    <meta name="description" content="Run a free, non-binding readiness preflight before purchasing a formal TxSentinel policy decision." />
+    <title>TxSentinel | Free preflight</title>
     <link rel="icon" href="/txsentinel-avatar.png" type="image/png" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
@@ -17,7 +17,7 @@
         </a>
         <nav class="primary-nav" aria-label="Primary navigation">
           <a href="/">Overview</a>
-          <a class="active" href="/evaluate.html" aria-current="page">Evaluate</a>
+          <a class="active" href="/evaluate.html" aria-current="page">Preflight</a>
           <a href="/onchain.html">Onchain</a>
           <a href="/integrate.html">Integrate</a>
         </nav>
@@ -31,11 +31,11 @@
     <main class="app-shell narrow-shell">
       <section class="page-heading compact-heading">
         <div>
-          <p class="eyebrow">POLICY EVALUATION</p>
-          <h1>Evaluate a proposed action</h1>
-          <p>Complete the four steps. No wallet connection or private key is required.</p>
+          <p class="eyebrow">FREE / NON-BINDING</p>
+          <h1>Preflight a proposed action</h1>
+          <p>Run basic readiness checks before paying. READY is not ALLOW, and preflight never issues a formal receipt.</p>
         </div>
-        <span class="endpoint-label">POST /api/check</span>
+        <span class="endpoint-label">POST /api/preflight</span>
       </section>
 
       <section class="scenario-panel" aria-labelledby="scenario-heading">
@@ -45,13 +45,13 @@
         </div>
         <div class="scenario-tabs" role="group" aria-label="Demo scenarios">
           <button type="button" class="scenario-tab active" data-scenario="safe" aria-pressed="true">
-            <span class="scenario-result allow">ALLOW</span>Routine transfer
+            <span class="scenario-result allow">READY</span>Routine transfer
           </button>
           <button type="button" class="scenario-tab" data-scenario="hold" aria-pressed="false">
-            <span class="scenario-result hold">HOLD</span>Spend cap breach
+            <span class="scenario-result hold">REVIEW</span>Spend cap breach
           </button>
           <button type="button" class="scenario-tab" data-scenario="deny" aria-pressed="false">
-            <span class="scenario-result deny">DENY</span>Unlimited approval
+            <span class="scenario-result deny">BLOCKED</span>Unlimited approval
           </button>
         </div>
       </section>
@@ -60,7 +60,7 @@
         <button type="button" class="wizard-step active" data-step="1" aria-current="step"><span>1</span><strong>Action</strong><small>What is proposed</small></button>
         <button type="button" class="wizard-step" data-step="2" disabled><span>2</span><strong>Policy</strong><small>User guardrails</small></button>
         <button type="button" class="wizard-step" data-step="3" disabled><span>3</span><strong>Evidence</strong><small>Simulation data</small></button>
-        <button type="button" class="wizard-step" data-step="4" disabled><span>4</span><strong>Result</strong><small>Decision receipt</small></button>
+        <button type="button" class="wizard-step" data-step="4" disabled><span>4</span><strong>Preflight</strong><small>Readiness only</small></button>
       </nav>
 
       <section class="wizard-shell" aria-live="polite">
@@ -121,7 +121,7 @@
 
           <section class="wizard-panel" data-panel="4" aria-labelledby="result-heading">
             <div class="panel-title">
-              <div><p class="section-label">STEP 4 OF 4</p><h2 id="result-heading">Review and evaluate</h2></div>
+              <div><p class="section-label">STEP 4 OF 4</p><h2 id="result-heading">Review and preflight</h2></div>
               <span id="decision-badge" class="decision-badge idle">READY</span>
             </div>
 
@@ -133,16 +133,18 @@
             </dl>
 
             <div id="empty-receipt" class="empty-receipt compact-empty">
-              <span>TX</span><h3>Ready to evaluate</h3><p>Review the summary, then run the live deterministic policy API.</p>
+              <span>PF</span><h3>Ready for preflight</h3><p>Review the proposal, then request a free non-binding readiness classification.</p>
             </div>
 
             <div id="receipt-content" class="receipt-content hidden">
-              <div class="decision-summary"><div><span class="metric-label">RISK SCORE</span><strong id="risk-value">0</strong><small>/100</small></div><div class="risk-track"><i id="risk-bar"></i></div></div>
               <dl class="receipt-facts">
-                <div><dt>Policy</dt><dd id="policy-version"></dd></div><div><dt>Action digest</dt><dd id="action-digest"></dd></div><div><dt>Receipt hash</dt><dd id="receipt-hash"></dd></div><div><dt>Evaluated</dt><dd id="evaluated-at"></dd></div>
+                <div><dt>Access</dt><dd id="preflight-access">Free preflight</dd></div>
+                <div><dt>Binding</dt><dd id="preflight-binding">No</dd></div>
+                <div><dt>Formal receipt</dt><dd id="preflight-receipt">Not issued</dd></div>
+                <div><dt>Checked</dt><dd id="evaluated-at"></dd></div>
               </dl>
-              <div class="reason-section"><p class="section-label">RULE EVIDENCE</p><div id="reason-list" class="reason-list"></div></div>
-              <div class="receipt-actions"><button id="copy-receipt" type="button">Copy JSON</button><button id="download-receipt" type="button">Download receipt</button><a href="/onchain.html">Continue to onchain proof <span aria-hidden="true">→</span></a></div>
+              <div class="evidence-note"><strong id="preflight-next-title">Next step</strong><p id="preflight-next"></p></div>
+              <div class="receipt-actions"><button id="copy-preflight" type="button">Copy preflight JSON</button><a href="/integrate.html#x402-payment-heading">Request formal paid check <span aria-hidden="true">→</span></a></div>
               <details><summary>Raw API response</summary><pre id="raw-response"></pre></details>
             </div>
             <div id="error-panel" class="error-panel hidden"><strong>Request failed</strong><p id="error-message"></p></div>
@@ -152,13 +154,13 @@
             <button id="previous-step" class="secondary-command" type="button" disabled>Back</button>
             <span id="step-position">Step 1 of 4</span>
             <button id="next-step" class="primary-command" type="button"><span>Continue</span><b aria-hidden="true">→</b></button>
-            <button id="evaluate" class="primary-command hidden" type="submit"><span>Evaluate transaction</span><b>RUN</b></button>
+            <button id="evaluate" class="primary-command hidden" type="submit"><span>Run free preflight</span><b>RUN</b></button>
           </div>
         </form>
       </section>
     </main>
 
-    <footer><span>TxSentinel / deterministic policy engine</span><a href="/integrate.html">API integration guide</a></footer>
+    <footer><span>TxSentinel / free readiness preflight</span><a href="/integrate.html">Formal x402 policy check</a></footer>
     <script src="/site.js" defer></script>
     <script src="/app.js" defer></script>
   </body>

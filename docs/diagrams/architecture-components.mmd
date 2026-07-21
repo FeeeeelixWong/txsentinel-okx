@@ -1,12 +1,18 @@
 flowchart TB
-  UI["Product console"] --> API["Free or x402 API boundary"]
-  AGENT["Agent integration"] --> API
-  API --> VALIDATE["Strict schema validation"]
+  UI["Product console"] --> PREFLIGHT["Free preflight boundary"]
+  AGENT["Agent integration"] --> PREFLIGHT
+  PREFLIGHT --> COARSE["READY / REVIEW / BLOCKED<br/>No receipt"]
+  UI --> API["Formal x402 boundary"]
+  AGENT --> API
+  API --> VALIDATE["Prepayment schema validation"]
   VALIDATE --> ENGINE["Pure deterministic policy engine"]
-  ENGINE --> RECEIPT["Decision + reasons + stable hashes"]
+  ENGINE --> PAYMENT["OKX x402 payment gate"]
+  PAYMENT --> RECEIPT["Decision + reasons + stable hashes"]
   RECEIPT --> UI
   RECEIPT --> AGENT
   RECEIPT --> WALLET["OKX Wallet confirmation"]
   WALLET --> ANCHOR["Canonical X Layer Policy Anchor"]
-  SIM["Supplied simulation evidence"] --> VALIDATE
-  POLICY["Owner policy settings"] --> VALIDATE
+  SIM["Supplied simulation evidence"] --> PREFLIGHT
+  SIM --> VALIDATE
+  POLICY["Owner policy settings"] --> PREFLIGHT
+  POLICY --> VALIDATE

@@ -102,6 +102,23 @@ app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "32kb" }));
 
+function preparePolicyEvaluation(req, res, next) {
+  if (req.method !== "POST") return next();
+
+  const validation = validateTransaction(req.body || {});
+  if (!validation.success) {
+    return res.status(422).json({
+      ok: false,
+      error: "INVALID_POLICY_REQUEST",
+      message: "The request was rejected before any x402 payment challenge or settlement.",
+      issues: validation.issues
+    });
+  }
+
+  req.txSentinelEvaluation = evaluateTransaction(validation.data);
+  return next();
+}
+
 app.get("/api/check-paid", (req, res) => {
   res.status(200).json({
     service: "TxSentinel x402 Policy Check",
@@ -114,6 +131,8 @@ app.get("/api/check-paid", (req, res) => {
     missing: configured ? [] : [...missingCredentials, ...(payTo ? [] : ["PAY_TO_ADDRESS"])]
   });
 });
+
+app.use("/api/check-paid", preparePolicyEvaluation);
 
 if (configured) {
   const facilitator = new ResilientOKXFacilitatorClient({
@@ -147,21 +166,18 @@ app.post("/api/check-paid", (req, res) => {
     return res.status(503).json({
       ok: false,
       error: "X402_CONFIGURATION_REQUIRED",
-      message: "The free review endpoint remains available at /api/check.",
+      message: "The free, non-binding preflight remains available at /api/preflight.",
       missing: [...missingCredentials, ...(payTo ? [] : ["PAY_TO_ADDRESS"])]
     });
-  }
-
-  const validation = validateTransaction(req.body || {});
-  if (!validation.success) {
-    return res.status(422).json({ ok: false, error: "INVALID_POLICY_REQUEST", issues: validation.issues });
   }
 
   return res.status(200).json({
     ok: true,
     protocol: "OKX x402",
+    access: "paid-formal-decision",
+    prepaymentValidation: true,
     evaluatedAt: new Date().toISOString(),
-    result: evaluateTransaction(validation.data)
+    result: req.txSentinelEvaluation
   });
 });
 
@@ -181,3 +197,4 @@ module.exports.buildPaymentOptions = buildPaymentOptions;
 module.exports.priceToAtomicUnits = priceToAtomicUnits;
 module.exports.resolveFacilitatorBaseUrl = resolveFacilitatorBaseUrl;
 module.exports.retrySupportedDiscovery = retrySupportedDiscovery;
+module.exports.preparePolicyEvaluation = preparePolicyEvaluation;

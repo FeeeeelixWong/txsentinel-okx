@@ -5,18 +5,19 @@
 > A deterministic transaction policy firewall for autonomous agents.
 
 Before an agent signs an onchain action, TxSentinel evaluates its intent, policy limits, and supplied
-simulation evidence. It then returns an explainable `ALLOW`, `HOLD`, or `DENY` receipt without taking
-custody, signing transactions, or broadcasting them.
+simulation evidence. Free preflight returns coarse readiness for routing; the formal x402 service
+returns an explainable `ALLOW`, `HOLD`, or `DENY` receipt after settlement. Neither path takes custody,
+signs the protected action, or broadcasts it.
 
 ## 🔗 Quick Links
 
 | Experience | Link | Purpose |
 | --- | --- | --- |
 | 🚀 Live product | [Open TxSentinel](https://txsentinel-okx.vercel.app) | Product overview and guided workflow |
-| 🧪 Policy evaluator | [Evaluate an action](https://txsentinel-okx.vercel.app/evaluate.html) | Test `ALLOW`, `HOLD`, and `DENY` decisions |
-| ⛓️ Onchain console | [Verify on X Layer](https://txsentinel-okx.vercel.app/onchain.html) | Register a policy and anchor a receipt |
+| 🧪 Free preflight | [Preflight an action](https://txsentinel-okx.vercel.app/evaluate.html) | Test non-binding `READY`, `REVIEW`, and `BLOCKED` readiness |
+| ⛓️ Onchain console | [Verify on X Layer](https://txsentinel-okx.vercel.app/onchain.html) | Register a policy and anchor a paid formal receipt |
 | 🔌 Integration guide | [Integrate an agent](https://txsentinel-okx.vercel.app/integrate.html) | Connect an agent or wallet workflow |
-| 📡 Free review API | [`POST /api/check`](https://txsentinel-okx.vercel.app/api/check) | Deterministic public evaluation endpoint |
+| 📡 Free preflight API | [`POST /api/preflight`](https://txsentinel-okx.vercel.app/api/preflight) | Coarse readiness without formal evidence or receipt hashes |
 
 **Project status:** ASP candidate `TxSentinel #6828` · Listing review submitted<br>
 **Built for:** OKX.AI Genesis Hackathon
@@ -35,10 +36,11 @@ custody, signing transactions, or broadcasting them.
 
 ![TxSentinel product flow](docs/assets/product-overview.svg)
 
-1. An agent constructs an action.
-2. TxSentinel evaluates the action **before it is signed**.
-3. The policy engine returns `ALLOW`, `HOLD`, or `DENY` with deterministic evidence.
-4. The wallet may anchor the receipt to X Layer without giving the contract custody or execution authority.
+1. An agent constructs an action and runs a free, non-binding preflight before wallet signing.
+2. Preflight returns only `READY`, `REVIEW`, or `BLOCKED` for routing.
+3. A valid formal request crosses the OKX x402 payment gate and returns `ALLOW`, `HOLD`, or `DENY`
+   with deterministic evidence.
+4. The wallet may separately execute an allowed action or anchor the paid receipt to X Layer.
 
 ## ⛓️ What Is Onchain?
 
@@ -51,7 +53,7 @@ revision. `anchorReceipt` stores evidence of a decision; it does not execute the
 
 Agent wallets make autonomous actions possible, but autonomy without a pre-sign policy boundary is unsafe. Most transaction simulators answer whether a transaction *can* execute. TxSentinel answers whether the agent *should* execute it under a specific mandate.
 
-Every decision contains:
+Every **formal paid decision** contains:
 
 - a normalized action and immutable policy snapshot
 - structured rule evidence and a deterministic risk score
@@ -61,7 +63,7 @@ Every decision contains:
 ## ⚡ Try It
 
 ```bash
-curl -sS https://txsentinel-okx.vercel.app/api/check \
+curl -sS https://txsentinel-okx.vercel.app/api/preflight \
   -H 'Content-Type: application/json' \
   -d '{
     "chain":"xlayer",
@@ -73,9 +75,14 @@ curl -sS https://txsentinel-okx.vercel.app/api/check \
   }'
 ```
 
-The endpoint also accepts an empty POST and evaluates a documented review sample, so marketplace reviewers can verify availability immediately.
+The free response contains only `READY`, `REVIEW`, or `BLOCKED`, a next action, and explicit
+limitations. It applies a lightweight readiness subset and does not expose the formal decision,
+risk score, reason evidence, `actionDigest`, or `receiptHash`. `READY` is not equivalent to `ALLOW`:
+the formal route still evaluates recipient lists, contract verification, slippage, fees, and the
+complete normalized policy. The legacy `/api/check` URL remains a deprecated alias so the submitted
+ASP review link does not break.
 
-## 🚦 Decision Model
+## 🚦 Formal Decision Model
 
 | Decision | Meaning | Representative rules |
 | --- | --- | --- |
@@ -98,12 +105,17 @@ the revision; receipts already anchored against an older revision do not change.
 
 ## 🔌 OKX Integration
 
-TxSentinel uses two deliberately isolated surfaces:
+TxSentinel uses two deliberately different product surfaces:
 
-1. `POST /api/check` is the free ASP review endpoint and remains stable while listing review is in progress.
-2. `POST /api/check-paid` uses the official `@okxweb3/x402-express`, `@okxweb3/x402-core`, and `@okxweb3/x402-evm` packages. It activates only when facilitator credentials and a receiving address are configured.
+1. `POST /api/preflight` is a free, non-binding readiness screen. It applies only basic checks and
+   returns `READY`, `REVIEW`, or `BLOCKED`; it never issues formal evidence or receipt hashes.
+2. `POST /api/check-paid` is the formal policy product. It returns `ALLOW`, `HOLD`, or `DENY`,
+   detailed rule evidence, risk score, stable hashes, and the x402 settlement receipt.
 
-When activated, an unpaid request receives HTTP `402` with `PAYMENT-REQUIRED`. An OKX Agentic Wallet signs the payment, retries with `PAYMENT-SIGNATURE`, and receives the policy result plus `PAYMENT-RESPONSE` after settlement.
+The paid route validates and deterministically precomputes the request **before** the x402 middleware.
+Malformed input returns HTTP `422` without a payment challenge. A valid unpaid request receives HTTP
+`402` with `PAYMENT-REQUIRED`; OKX Wallet signs, retries with `PAYMENT-SIGNATURE`, and receives the
+formal result plus `PAYMENT-RESPONSE` after settlement.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the exact trust boundary and [docs/API.md](docs/API.md) for the request contract.
 
@@ -143,10 +155,13 @@ profile. It would not make these fields editable by the buyer.
 
 ### Buyer operation
 
-1. The agent submits the protected action and receives the seller's server-issued payment terms.
-2. The buyer may choose one accepted token, review the amount and recipient, and connect OKX Wallet.
-3. The wallet signs only after explicit approval. The request is retried with payment proof.
-4. After settlement, the buyer receives both the policy decision and a verifiable payment receipt.
+1. The agent calls free preflight and receives coarse readiness without formal receipt material.
+2. If a formal report is needed, the agent submits the same proposal to the paid route. Invalid input
+   stops before payment; valid input receives the seller's server-issued terms.
+3. The buyer chooses one accepted token, reviews the amount and recipient, and explicitly approves
+   the EIP-3009 authorization in OKX Wallet.
+4. After settlement, the buyer receives the formal policy decision, detailed evidence, deterministic
+   hashes, and a verifiable payment receipt.
 
 This separation prevents a buyer from changing the fee to zero or redirecting it to another address,
 while still allowing the buyer or agent to define the transaction that TxSentinel evaluates.
@@ -157,11 +172,12 @@ while still allowing the buyer or agent to define the transaction that TxSentine
 
 ![TxSentinel end-to-end x402 interaction](docs/assets/x402-interaction-sequence.svg)
 
-- **Steps 1–2:** the seller configures the paid service and publishes a protected endpoint.
-- **Steps 3–12:** the buyer requests a policy check, approves the quoted x402 payment in OKX Wallet,
-  and receives both the settlement receipt and deterministic policy result.
-- **Steps 9–10:** the service payment settles on X Layer to the seller-controlled `payTo` address.
-- **Steps 13–14:** the buyer may separately anchor the policy receipt hash on X Layer. This optional
+- **Steps 1–2:** the seller configures the service and publishes free preflight plus the formal route.
+- **Steps 3–4:** preflight returns coarse readiness without wallet use, formal evidence, or hashes.
+- **Steps 5–15:** the paid route validates and precomputes offchain before issuing a 402; the buyer
+  then authorizes settlement and receives the formal decision and deterministic receipt.
+- **Steps 12–13:** the service payment settles on X Layer to the seller-controlled `payTo` address.
+- **Steps 16–17:** the buyer may separately anchor the paid policy receipt hash on X Layer. This optional
   evidence transaction does not execute the protected action and does not give TxSentinel custody.
 
 The protected action itself remains a proposal. An `ALLOW` result permits the buyer's wallet or
@@ -177,7 +193,9 @@ npx vercel@53.4.0 dev --listen 8791
 npm run smoke
 ```
 
-The test suite covers policy boundaries, normalization, receipt determinism, input rejection, and HTTP behavior. The smoke suite exercises all three decisions against a running deployment and verifies the x402 readiness state.
+The test suite covers policy boundaries, preflight information limits, receipt determinism,
+prepayment rejection, and HTTP behavior. The smoke suite exercises all three coarse preflight
+states and verifies the x402 readiness state.
 
 ## 💳 Official x402 Activation
 
@@ -223,7 +241,8 @@ checks the balance of the selected token and network before enabling the explici
 
 The optional `TxSentinelPolicyAnchor` contract stores immutable policy-version snapshots and
 deterministic receipt hashes. Open `/onchain.html` to connect OKX Wallet, verify the canonical X
-Layer Testnet deployment, register policy v1, run a live policy evaluation, and anchor its receipt.
+Layer Testnet deployment, register policy v1, load the latest paid x402 receipt from the same browser,
+and anchor its hashes.
 The contract cannot hold or transfer assets and does not receive signing authority.
 
 - Canonical X Layer Testnet contract: [`0x295975cbec1673061d11c223b35a8513d1ebb213`](https://www.okx.com/web3/explorer/xlayer-test/address/0x295975cbec1673061d11c223b35a8513d1ebb213)
@@ -282,13 +301,18 @@ Policy v1 so the end-to-end registration and receipt flow stays easy to verify.
 
 ## 🔒 Security
 
-TxSentinel is read-only. It rejects unknown top-level and policy fields, caps request size on the paid endpoint, never accepts a private key field, and cannot sign or broadcast transactions. Supplied simulation evidence is labeled as evidence, not represented as an RPC simulation performed by TxSentinel.
+TxSentinel is read-only. It rejects unknown top-level and policy fields before payment, caps request
+size on the paid endpoint, never accepts a private key field, and cannot sign or broadcast
+transactions. Free preflight never returns formal evidence or receipt hashes. Supplied simulation
+evidence is labeled as evidence, not represented as an RPC simulation performed by TxSentinel.
 
 ## 🗂️ Repository Map
 
 ```text
-api/check.js          Free deterministic policy endpoint
-api/check-paid.js     Official OKX x402 protected endpoint
+api/preflight.js      Free, non-binding readiness endpoint
+api/check.js          Deprecated preflight alias for ASP link compatibility
+api/check-paid.js     Formal OKX x402 policy endpoint with prepayment validation
+lib/preflight.js      Coarse response and information boundary
 lib/policy.js         Pure policy and receipt engine
 public/               Overview, four-step evaluator, onchain console, and integration guide
 contracts/            Non-custodial X Layer policy receipt anchor
@@ -298,7 +322,7 @@ test/                 Policy and HTTP contract tests
 
 ## ✅ Status
 
-- ✅ Live policy product and public API: complete
+- ✅ Free preflight and formal paid API separation: complete
 - ✅ ASP `#6828` activation and listing review: submitted
 - ✅ Official x402 server integration: implemented
 - ✅ x402 seller configuration: facilitator credentials and `PAY_TO_ADDRESS` are live

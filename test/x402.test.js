@@ -68,6 +68,17 @@ test("official OKX middleware emits a standard unpaid 402 challenge", async () =
   const resourcePort = await listen(resource);
 
   try {
+    const invalid = await fetch(`http://127.0.0.1:${resourcePort}/api/check-paid`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Forwarded-Proto": "https" },
+      body: JSON.stringify({ amountUsd: -1 })
+    });
+    const invalidBody = await invalid.json();
+    assert.equal(invalid.status, 422);
+    assert.equal(invalidBody.error, "INVALID_POLICY_REQUEST");
+    assert.match(invalidBody.message, /before any x402 payment/i);
+    assert.equal(invalid.headers.get("payment-required"), null);
+
     const response = await fetch(`http://127.0.0.1:${resourcePort}/api/check-paid`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Forwarded-Proto": "https" },

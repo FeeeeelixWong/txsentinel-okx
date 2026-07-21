@@ -30,27 +30,27 @@ const segments = [
   {
     minDuration: 11,
     scene: "allow",
-    voiceover: "First, a routine transfer on X Layer stays below the spend and fee caps. The live API returns ALLOW, risk zero, and a deterministic receipt.",
+    voiceover: "First, a routine transfer on X Layer passes basic free preflight as READY. READY is not ALLOW: the result is non-binding and contains no formal evidence or receipt hash.",
   },
   {
     minDuration: 11,
     scene: "hold",
-    voiceover: "Next, an eight-hundred-fifty-dollar swap exceeds a five-hundred-dollar mandate. Execution may be possible, but policy returns HOLD with exact limit evidence.",
+    voiceover: "Next, an eight-hundred-fifty-dollar swap exceeds a five-hundred-dollar mandate. Free preflight marks it REVIEW without exposing the paid rule report.",
   },
   {
     minDuration: 11,
     scene: "deny",
-    voiceover: "An unlimited token approval crosses a hard boundary. TxSentinel returns DENY, risk one hundred, and identifies the critical rule without exposing signing authority.",
+    voiceover: "An unlimited token approval crosses a hard boundary. Preflight marks it BLOCKED so the agent can stop before any wallet or payment request.",
   },
   {
     minDuration: 13,
     scene: "receipt",
-    voiceover: "Every response contains normalized inputs, the policy version, rule evidence, an action digest, and a SHA-two-fifty-six receipt. Identical inputs reproduce the same receipt hash.",
+    voiceover: "The free response contains only readiness, limitations, and the next step. Formal decisions, detailed evidence, stable hashes, and anchorable receipts remain behind x402.",
   },
   {
     minDuration: 13,
     scene: "integration",
-    voiceover: "The free review API is live. A separate paid endpoint integrates the official OKX x402 Express, Core, and EVM packages for pay-per-check access by Agentic Wallets.",
+    voiceover: "The formal endpoint validates offchain before payment, then uses the official OKX x402 Express, Core, and EVM packages to settle and reveal the detailed result.",
   },
   {
     minDuration: 8,
@@ -164,9 +164,9 @@ const showScene = (page, kind) => page.evaluate((sceneKind) => {
   if (sceneKind === "intro") {
     scene.innerHTML = `<span class="eyebrow">TXSENTINEL / OKX.AI GENESIS HACKATHON</span><h1>Inspect the action before the agent signs.</h1><p>A deterministic transaction policy firewall for autonomous agents and Agentic Wallets.</p>`;
   } else if (sceneKind === "integration") {
-    scene.innerHTML = `<span class="eyebrow">OFFICIAL OKX INTEGRATION</span><h1>One policy boundary. Two access paths.</h1><div class="flow-grid"><div><b>Free review API</b><span>Live policy checks for judges and ASP review.</span></div><div><b>Official x402 route</b><span>Express, Core, and EVM SDK packages integrated.</span></div><div><b>No signing authority</b><span>The firewall never receives keys or broadcasts transactions.</span></div></div>`;
+    scene.innerHTML = `<span class="eyebrow">OFFICIAL OKX INTEGRATION</span><h1>Preflight first. Purchase proof when needed.</h1><div class="flow-grid"><div><b>Free readiness</b><span>Basic READY, REVIEW, or BLOCKED routing. READY never means ALLOW.</span></div><div><b>Formal x402 route</b><span>Complete policy evaluation, settlement, then detailed evidence and stable hashes.</span></div><div><b>No signing authority</b><span>The firewall never receives keys or broadcasts transactions.</span></div></div>`;
   } else {
-    scene.innerHTML = `<span class="eyebrow">TXSENTINEL / ASP #6828</span><h1>Policy before signing.</h1><p>ALLOW safe actions. HOLD exceptions. DENY hard violations.</p><div class="stack"><div>POST /api/check</div><div>POST /api/check-paid</div><div>SHA-256 deterministic receipt</div></div>`;
+    scene.innerHTML = `<span class="eyebrow">TXSENTINEL / ASP #6828</span><h1>Policy before signing.</h1><p>Preflight for routing. x402 for formal evidence.</p><div class="stack"><div>POST /api/preflight</div><div>POST /api/check-paid</div><div>Paid SHA-256 deterministic receipt</div></div>`;
   }
   document.body.appendChild(scene);
 }, kind);
@@ -188,7 +188,7 @@ const evaluateScenario = async (page, name, decision) => {
   for (let step = 0; step < 3; step += 1) {
     await page.getByRole("button", { name: /Continue/i }).click();
   }
-  await page.getByRole("button", { name: /Evaluate transaction/i }).click();
+  await page.getByRole("button", { name: /Run free preflight/i }).click();
   await page.locator("#decision-badge").getByText(decision, { exact: true }).waitFor({ timeout: 10_000 });
   await page.locator(".wizard-shell").scrollIntoViewIfNeeded();
 };
@@ -219,9 +219,9 @@ const record = async (timed) => {
       await hideScene(page);
       await page.evaluate(() => window.scrollTo(0, 0));
     });
-    await step(page, timed[2], () => evaluateScenario(page, "Routine transfer", "ALLOW"));
-    await step(page, timed[3], () => evaluateScenario(page, "Spend cap breach", "HOLD"));
-    await step(page, timed[4], () => evaluateScenario(page, "Unlimited approval", "DENY"));
+    await step(page, timed[2], () => evaluateScenario(page, "Routine transfer", "READY"));
+    await step(page, timed[3], () => evaluateScenario(page, "Spend cap breach", "REVIEW"));
+    await step(page, timed[4], () => evaluateScenario(page, "Unlimited approval", "BLOCKED"));
     await step(page, timed[5], async () => {
       await page.locator("#receipt-content details").evaluate((element) => { element.open = true; });
       await page.locator("#receipt-content").scrollIntoViewIfNeeded();

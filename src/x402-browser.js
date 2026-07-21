@@ -291,6 +291,14 @@ async function payAndRun() {
     if (!encodedReceipt) throw new Error("The policy check succeeded, but no settlement receipt was returned.");
     const receipt = decodePaymentResponseHeader(encodedReceipt);
     const transaction = receipt.transaction || receipt.txHash || receipt.transactionHash;
+    if (responseBody.result?.receiptHash && responseBody.result?.actionDigest) {
+      window.localStorage.setItem("txsentinel.latestPaidReceipt", JSON.stringify({
+        savedAt: new Date().toISOString(),
+        evaluatedAt: responseBody.evaluatedAt,
+        result: responseBody.result,
+        settlement: { transaction: transaction || null, receipt }
+      }));
+    }
 
     elements.title.textContent = "Settlement verified";
     elements.badge.textContent = "SETTLED";
@@ -302,7 +310,7 @@ async function payAndRun() {
       elements.explorer.classList.remove("hidden");
     }
     setStep(4);
-    setMessage(`Payment settled and policy decision returned: ${responseBody.decision || "verified"}.`, "success");
+    setMessage(`Payment settled and formal policy decision returned: ${responseBody.result?.decision || "verified"}.`, "success");
     payLabel.textContent = "Payment settled";
   } catch (error) {
     setStep(2);

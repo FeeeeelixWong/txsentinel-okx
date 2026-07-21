@@ -9,9 +9,9 @@ sequenceDiagram
   W->>C: registerPolicy(policyKey, policyHash, versionHash)
   C-->>W: PolicyRegistered
 
-  Note over U,C: Repeated for actions that need evidence
-  U->>T: Proposed action + policy + simulation evidence
-  T-->>U: ALLOW / HOLD / DENY + receiptHash
+  Note over U,C: Repeated for formal paid decisions that need evidence
+  U->>T: Paid x402 policy request + payment proof
+  T-->>U: ALLOW / HOLD / DENY + deterministic hashes
   U->>W: Confirm receipt attestation
   W->>C: anchorReceipt(receiptHash, actionDigest, decision)
   C-->>W: ReceiptAnchored

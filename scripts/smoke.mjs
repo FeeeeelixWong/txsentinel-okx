@@ -37,7 +37,7 @@ async function jsonRequest(path, options) {
 }
 
 async function evaluate(payload) {
-  return jsonRequest("/api/check", {
+  return jsonRequest("/api/preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -48,28 +48,35 @@ const health = await jsonRequest("/api/health");
 assert.equal(health.response.status, 200);
 assert.equal(health.body.status, "ready");
 
+const expectedPreflight = { allow: "READY", hold: "REVIEW", deny: "BLOCKED" };
+
 for (const [name, payload] of Object.entries(scenarios)) {
   const { response, body } = await evaluate(payload);
   assert.equal(response.status, 200, `${name} must return HTTP 200`);
-  assert.equal(body.result.decision, name.toUpperCase());
-  assert.match(body.result.actionDigest, /^0x[0-9a-f]{64}$/);
-  assert.match(body.result.receiptHash, /^0x[0-9a-f]{64}$/);
-  console.log(`${name.toUpperCase()} ${body.result.riskScore}/100 ${body.result.receiptHash}`);
+  assert.equal(body.preflight.status, expectedPreflight[name]);
+  assert.equal(body.preflight.formalDecision, false);
+  assert.equal(body.preflight.receiptIssued, false);
+  assert.equal(body.result, undefined);
+  console.log(`${name.toUpperCase()} -> ${body.preflight.status} preflight`);
 }
-
-const first = await evaluate(scenarios.allow);
-const second = await evaluate(scenarios.allow);
-assert.equal(first.body.result.receiptHash, second.body.result.receiptHash, "receipt must be deterministic");
 
 const invalid = await evaluate({ amountUsd: -1 });
 assert.equal(invalid.response.status, 422);
 assert.equal(invalid.body.error, "INVALID_POLICY_REQUEST");
+
+const legacy = await jsonRequest("/api/check");
+assert.equal(legacy.response.status, 200);
+assert.equal(legacy.response.headers.get("deprecation"), "true");
+assert.equal(legacy.body.endpoint, "/api/preflight");
 
 const x402 = await jsonRequest("/api/check-paid");
 assert.equal(x402.response.status, 200);
 assert.ok(["ready", "configuration_required"].includes(x402.body.status));
 
 if (x402.body.status === "ready") {
+  const invalidPaid = await evaluatePaid({ amountUsd: -1 });
+  assert.equal(invalidPaid.response.status, 422);
+  assert.equal(invalidPaid.response.headers.get("payment-required"), null);
   const unpaid = await evaluatePaid(scenarios.allow);
   assert.equal(unpaid.response.status, 402);
   assert.ok(unpaid.response.headers.get("payment-required"), "402 must expose PAYMENT-REQUIRED");

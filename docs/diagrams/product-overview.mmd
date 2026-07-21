@@ -1,8 +1,15 @@
 flowchart TB
-  A["Agent proposes an action"] --> B["TxSentinel checks policy and evidence"]
-  B --> C{"Decision"}
-  C -->|"ALLOW"| D["Wallet may execute"]
-  C -->|"HOLD"| E["Human review"]
-  C -->|"DENY"| F["Stop"]
-  C --> G["Deterministic receipt"]
-  G -->|"OKX Wallet attestation"| H["X Layer Policy Anchor"]
+  A["Agent proposes an action"] --> B["Free preflight runs basic readiness checks"]
+  B --> C{"Readiness"}
+  C -->|"READY"| D["Request formal x402 check"]
+  C -->|"REVIEW"| E["Inspect or request detailed report"]
+  C -->|"BLOCKED"| F["Stop"]
+  D --> G["Prepayment validation"]
+  E --> G
+  G --> H["OKX x402 settlement"]
+  H --> I{"Formal decision"}
+  I -->|"ALLOW"| J["Wallet may execute separately"]
+  I -->|"HOLD"| K["Human review"]
+  I -->|"DENY"| L["Stop"]
+  I --> M["Deterministic receipt"]
+  M -->|"Optional OKX Wallet attestation"| N["X Layer Policy Anchor"]

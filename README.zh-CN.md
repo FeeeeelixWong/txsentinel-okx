@@ -4,19 +4,19 @@
 
 > 面向自主智能体的确定性交易策略防火墙。
 
-在智能体签署链上操作之前，TxSentinel 会评估操作意图、策略限制和外部提供的模拟证据，
-并生成可解释的 `ALLOW`、`HOLD` 或 `DENY` 决策凭证。TxSentinel 不托管资产、不签署交易，
-也不负责广播交易。
+在智能体签署链上操作之前，TxSentinel 会评估操作意图、策略限制和外部提供的模拟证据。
+免费预检只返回用于分流的粗粒度状态；正式 x402 服务在结算后返回可解释的 `ALLOW`、
+`HOLD` 或 `DENY` 决策凭证。两条路径都不托管资产、不签署被检查交易，也不负责广播交易。
 
 ## 🔗 快速入口
 
 | 功能 | 链接 | 用途 |
 | --- | --- | --- |
 | 🚀 在线产品 | [打开 TxSentinel](https://txsentinel-okx.vercel.app) | 查看产品概览和引导式工作流 |
-| 🧪 策略评估器 | [评估链上操作](https://txsentinel-okx.vercel.app/evaluate.html) | 测试 `ALLOW`、`HOLD` 和 `DENY` 决策 |
-| ⛓️ 链上控制台 | [在 X Layer 上验证](https://txsentinel-okx.vercel.app/onchain.html) | 注册策略并锚定决策凭证 |
+| 🧪 免费预检 | [预检链上操作](https://txsentinel-okx.vercel.app/evaluate.html) | 测试非正式的 `READY`、`REVIEW` 和 `BLOCKED` 状态 |
+| ⛓️ 链上控制台 | [在 X Layer 上验证](https://txsentinel-okx.vercel.app/onchain.html) | 注册策略并锚定付费正式凭证 |
 | 🔌 集成指南 | [接入智能体](https://txsentinel-okx.vercel.app/integrate.html) | 接入智能体或钱包工作流 |
-| 📡 免费审核 API | [`POST /api/check`](https://txsentinel-okx.vercel.app/api/check) | 确定性的公开策略评估接口 |
+| 📡 免费预检 API | [`POST /api/preflight`](https://txsentinel-okx.vercel.app/api/preflight) | 只返回粗粒度状态，不返回正式证据或凭证哈希 |
 
 **项目状态：** ASP 候选服务 `TxSentinel #6828` · 已提交上架审核<br>
 **参赛项目：** OKX.AI Genesis Hackathon
@@ -35,10 +35,10 @@
 
 ![TxSentinel 产品流程](docs/assets/product-overview.svg)
 
-1. 智能体构造一笔链上操作。
-2. TxSentinel 在操作被签名之前执行策略检查。
-3. 策略引擎返回 `ALLOW`、`HOLD` 或 `DENY`，并生成确定性证据。
-4. 钱包可以将凭证锚定到 X Layer，同时不向合约授予资产托管权或交易执行权。
+1. 智能体构造一笔链上操作，并在钱包签名前运行免费、非正式预检。
+2. 预检只返回用于分流的 `READY`、`REVIEW` 或 `BLOCKED`。
+3. 合法的正式请求通过 OKX x402 付费门槛后，才返回带确定性证据的 `ALLOW`、`HOLD` 或 `DENY`。
+4. 钱包可以单独执行获得 `ALLOW` 的操作，也可以选择把付费凭证锚定到 X Layer。
 
 ## ⛓️ 哪些内容会上链？
 
@@ -53,7 +53,7 @@
 大多数交易模拟器回答的是一笔交易“能否执行”，TxSentinel 回答的是智能体在特定授权范围内
 “是否应该执行”这笔交易。
 
-每一份决策结果都包含：
+每一份**正式付费决策结果**都包含：
 
 - 标准化后的操作和不可变的策略快照
 - 结构化规则证据和确定性风险分数
@@ -63,7 +63,7 @@
 ## ⚡ 快速体验
 
 ```bash
-curl -sS https://txsentinel-okx.vercel.app/api/check \
+curl -sS https://txsentinel-okx.vercel.app/api/preflight \
   -H 'Content-Type: application/json' \
   -d '{
     "chain":"xlayer",
@@ -75,9 +75,12 @@ curl -sS https://txsentinel-okx.vercel.app/api/check \
   }'
 ```
 
-该接口也接受空的 POST 请求，并返回一个有文档说明的审核示例，方便市场审核人员直接验证服务可用性。
+免费响应只包含 `READY`、`REVIEW` 或 `BLOCKED`、建议下一步和明确的能力限制；它只执行
+轻量 readiness 筛查，不返回正式决策、风险分、规则证据、`actionDigest` 或 `receiptHash`。
+`READY` 不等于 `ALLOW`：收款人名单、合约验证、滑点、手续费和完整标准化 Policy 仍由正式
+付费路由检查。旧 `/api/check` 地址保留为已弃用兼容别名，避免已经提交的 ASP 审核链接失效。
 
-## 🚦 决策模型
+## 🚦 正式决策模型
 
 | 决策 | 含义 | 典型规则 |
 | --- | --- | --- |
@@ -100,14 +103,16 @@ curl -sS https://txsentinel-okx.vercel.app/api/check \
 
 ## 🔌 OKX 集成
 
-TxSentinel 将免费审核和付费服务隔离为两个独立入口：
+TxSentinel 将免费预检和正式付费服务设计为两个能力不同的入口：
 
-1. `POST /api/check` 是稳定开放的免费 ASP 审核接口。
-2. `POST /api/check-paid` 使用官方 `@okxweb3/x402-express`、`@okxweb3/x402-core` 和
-   `@okxweb3/x402-evm`。只有配置 facilitator 凭证和收款地址后才会启用收费。
+1. `POST /api/preflight` 是免费、非正式的 readiness 检查，只执行基础筛查并返回 `READY`、
+   `REVIEW` 或 `BLOCKED`，不会产生正式证据或凭证哈希。
+2. `POST /api/check-paid` 是正式策略产品，返回 `ALLOW`、`HOLD` 或 `DENY`、详细规则证据、
+   风险分、稳定哈希以及 x402 结算凭证。
 
-启用后，未付款请求会收到 HTTP `402` 和 `PAYMENT-REQUIRED`。OKX Agentic Wallet 完成签名后，
-携带 `PAYMENT-SIGNATURE` 重试请求；结算完成后，服务返回策略结果和 `PAYMENT-RESPONSE`。
+付费路由会在 x402 中间件之前完成请求校验和确定性预计算。格式错误会直接返回 HTTP `422`，
+不会生成付款 challenge。合法的未付款请求才会收到 HTTP `402` 和 `PAYMENT-REQUIRED`；
+OKX Wallet 签名并携带 `PAYMENT-SIGNATURE` 重试后，服务返回正式结果和 `PAYMENT-RESPONSE`。
 
 完整信任边界见 [ARCHITECTURE.md](ARCHITECTURE.md)，请求格式见 [docs/API.md](docs/API.md)。
 
@@ -146,10 +151,10 @@ TxSentinel 将免费审核和付费服务隔离为两个独立入口：
 
 ### 买方如何操作？
 
-1. 智能体提交被检查交易，并收到卖方确定的支付条款。
-2. 买方可以选择一种受支持币种，核对金额和收款人，然后连接 OKX Wallet。
-3. 钱包只有在买方明确批准后才会签名，请求随后携带支付证明重试。
-4. 结算成功后，买方同时获得策略决策与可验证支付凭证。
+1. 智能体先调用免费预检，只获得粗粒度 readiness，不会获得正式凭证材料。
+2. 需要正式报告时，再向付费路由提交同一提案；格式错误会在付款前停止，合法请求才会收到卖方条款。
+3. 买方选择一种支持的币种，核对金额和收款人，并在 OKX Wallet 中明确批准 EIP-3009 授权。
+4. 结算成功后，买方获得正式策略决策、详细证据、确定性哈希和可验证付款凭证。
 
 这种分工既能防止买方把服务费改成零或替换收款地址，也保留了买方或智能体定义被检查交易的能力。
 
@@ -159,10 +164,11 @@ TxSentinel 将免费审核和付费服务隔离为两个独立入口：
 
 ![TxSentinel 端到端 x402 交互时序](docs/assets/x402-interaction-sequence.svg)
 
-- **第 1–2 步：** 卖方配置付费服务，并开放受 x402 保护的接口。
-- **第 3–12 步：** 买方请求策略检查，在 OKX Wallet 中批准报价，随后获得链上结算凭证和确定性策略结果。
-- **第 9–10 步：** x402 服务费在 X Layer 上结算至卖方控制的 `payTo` 地址。
-- **第 13–14 步：** 买方可以选择将策略凭证哈希单独锚定到 X Layer。这笔可选证据交易不会执行被检查交易，也不会让 TxSentinel 托管资产。
+- **第 1–2 步：** 卖方配置服务，并开放免费预检和正式付费路由。
+- **第 3–4 步：** 免费预检返回粗粒度 readiness，不调用钱包，也不返回正式证据或哈希。
+- **第 5–15 步：** 付费路由先在链下校验和预计算，再返回 402；买方授权结算后获得正式决策与确定性凭证。
+- **第 12–13 步：** x402 服务费在 X Layer 上结算至卖方控制的 `payTo` 地址。
+- **第 16–17 步：** 买方可以选择将付费策略凭证哈希单独锚定到 X Layer。这笔可选证据交易不会执行被检查交易，也不会让 TxSentinel 托管资产。
 
 被检查交易始终只是一份提案。`ALLOW` 表示买方钱包或智能体工作流可以继续，但
 TxSentinel 本身不会签名或广播该交易。
@@ -177,8 +183,8 @@ npx vercel@53.4.0 dev --listen 8791
 npm run smoke
 ```
 
-测试覆盖策略边界、标准化、凭证确定性、异常输入和 HTTP 行为。Smoke 测试会对运行中的部署
-执行三种决策，并检查 x402 服务状态。
+测试覆盖策略边界、预检信息限制、凭证确定性、付款前拒绝和 HTTP 行为。Smoke 测试会对
+运行中的部署执行三种粗粒度预检状态，并检查 x402 服务状态。
 
 ## 💳 启用官方 x402
 
@@ -226,7 +232,7 @@ X Layer 官方水龙头领取，每次支付都必须由钱包重新明确确认
 
 可选合约 `TxSentinelPolicyAnchor` 用于存储不可变的策略版本快照和确定性凭证哈希。
 打开 `/onchain.html`，连接 OKX Wallet 后可以验证标准 X Layer 测试网部署、注册 Policy v1、
-执行实时策略评估并锚定凭证。合约不能持有或转移资产，也不会获得签名权限。
+加载同一浏览器中最新的付费 x402 正式凭证并锚定其哈希。合约不能持有或转移资产，也不会获得签名权限。
 
 - X Layer 测试网标准合约：[`0x295975cbec1673061d11c223b35a8513d1ebb213`](https://www.okx.com/web3/explorer/xlayer-test/address/0x295975cbec1673061d11c223b35a8513d1ebb213)
 - 部署交易：[`0x6604803f...741ae9`](https://www.okx.com/web3/explorer/xlayer-test/tx/0x6604803fda9b0b298ed18ea1e3e9dfc4b58b05e0f2989652f64500e8aa741ae9)
@@ -280,15 +286,17 @@ npm run contract:test
 
 ## 🔒 安全边界
 
-TxSentinel 是只读策略服务。它会拒绝未知字段、限制付费接口的请求体大小、从不接收私钥字段，
-并且不能签名或广播交易。外部提交的模拟结果只会被标记为“证据”，不会被描述成 TxSentinel
-自行执行的 RPC 模拟。
+TxSentinel 是只读策略服务。它会在付款前拒绝未知字段、限制付费接口的请求体大小、从不接收
+私钥字段，并且不能签名或广播交易。免费预检不会返回正式证据或凭证哈希。外部提交的模拟
+结果只会被标记为“证据”，不会被描述成 TxSentinel 自行执行的 RPC 模拟。
 
 ## 🗂️ 仓库结构
 
 ```text
-api/check.js          免费确定性策略接口
-api/check-paid.js     官方 OKX x402 付费接口
+api/preflight.js      免费、非正式 readiness 预检接口
+api/check.js          为 ASP 链接保留的已弃用预检别名
+api/check-paid.js     带付款前校验的正式 OKX x402 策略接口
+lib/preflight.js      粗粒度响应与信息边界
 lib/policy.js         纯函数策略与凭证引擎
 public/               产品概览、四步评估器、链上控制台和集成指南
 contracts/            非托管 X Layer 策略凭证合约
@@ -298,7 +306,7 @@ test/                 策略和 HTTP 合约测试
 
 ## ✅ 当前状态
 
-- ✅ 在线策略产品和公开 API：已完成
+- ✅ 免费预检与正式付费 API 分层：已完成
 - ✅ ASP `#6828` 激活与上架审核：已提交
 - ✅ 官方 x402 服务端集成：已实现
 - ✅ x402 卖方配置：facilitator 凭证和 `PAY_TO_ADDRESS` 已在线

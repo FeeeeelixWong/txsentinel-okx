@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "npm run browser:build && npm run contract:compile && node --test",
-    "check": "npm run browser:build && node --check api/check.js && node --check api/check-paid.js && node --check api/health.js && node --check lib/policy.js && node --check public/site.js && node --check public/app.js && node --check public/onchain.js && node --check public/integrate.js && node --check public/x402-browser.js && node --check scripts/compile-contract.mjs && node --check scripts/record-demo.mjs && npm run contract:lint",
+    "check": "npm run browser:build && node --check api/check.js && node --check api/preflight.js && node --check api/check-paid.js && node --check api/health.js && node --check lib/policy.js && node --check lib/preflight.js && node --check public/site.js && node --check public/app.js && node --check public/onchain.js && node --check public/integrate.js && node --check public/x402-browser.js && node --check scripts/compile-contract.mjs && node --check scripts/record-demo.mjs && npm run contract:lint",
     "browser:build": "esbuild src/x402-browser.js --bundle --minify --format=iife --platform=browser --target=es2020 --alias:crypto=./src/browser-crypto-shim.js --outfile=public/x402-browser.js",
     "smoke": "node scripts/smoke.mjs",
     "demo:record": "node scripts/record-demo.mjs",

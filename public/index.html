@@ -20,7 +20,7 @@
         </a>
         <nav class="primary-nav" aria-label="Primary navigation">
           <a class="active" href="/" aria-current="page">Overview</a>
-          <a href="/evaluate.html">Evaluate</a>
+          <a href="/evaluate.html">Preflight</a>
           <a href="/onchain.html">Onchain</a>
           <a href="/integrate.html">Integrate</a>
         </nav>
@@ -37,18 +37,18 @@
           <p class="eyebrow">OKX.AI GENESIS HACKATHON / ASP #6828</p>
           <h1>Control the transaction before it reaches the wallet.</h1>
           <p>
-            One workspace for deterministic policy evaluation, human review, wallet approval,
-            and immutable X Layer evidence.
+            Route proposed actions with a free, non-binding preflight. Purchase a formal policy
+            decision only when an agent needs detailed evidence and a reproducible receipt.
           </p>
         </div>
-        <a class="primary-link" href="/evaluate.html">Start an evaluation <span aria-hidden="true">→</span></a>
+        <a class="primary-link" href="/evaluate.html">Run free preflight <span aria-hidden="true">→</span></a>
       </section>
 
       <section class="overview-block" aria-labelledby="runbook-heading">
         <div class="section-heading">
           <div>
             <p class="section-label">PRODUCT RUNBOOK</p>
-            <h2 id="runbook-heading">One action, four controlled stages</h2>
+            <h2 id="runbook-heading">One action, four explicit stages</h2>
           </div>
           <p>Policy logic stays offchain. Wallet authority stays with the user. Evidence is anchored onchain.</p>
         </div>
@@ -60,18 +60,18 @@
           </li>
           <li>
             <span>02</span>
-            <strong>Evaluate policy</strong>
-            <p>Deterministic rules return ALLOW, HOLD, or DENY with exact reasons.</p>
+            <strong>Route with preflight</strong>
+            <p>Get READY, REVIEW, or BLOCKED without payment, a formal decision, or receipt hashes.</p>
           </li>
           <li>
             <span>03</span>
-            <strong>Confirm in wallet</strong>
-            <p>OKX Wallet remains the only signing boundary. TxSentinel never receives a key.</p>
+            <strong>Purchase formal evidence</strong>
+            <p>Valid requests use OKX x402 to return ALLOW, HOLD, or DENY with reasons and stable hashes.</p>
           </li>
           <li>
             <span>04</span>
-            <strong>Anchor evidence</strong>
-            <p>X Layer stores the policy revision, action digest, decision, and receipt hash.</p>
+            <strong>Act or anchor</strong>
+            <p>The wallet may execute an allowed action; a paid receipt may be anchored on X Layer.</p>
           </li>
         </ol>
       </section>
@@ -86,7 +86,7 @@
             <span class="endpoint-label">X Layer Testnet</span>
           </div>
           <dl class="status-list">
-            <div><dt>Policy API</dt><dd id="api-state">Checking</dd></div>
+            <div><dt>Preflight API</dt><dd id="api-state">Checking</dd></div>
             <div><dt>Official x402</dt><dd id="x402-state">Checking</dd></div>
             <div><dt>Canonical contract</dt><dd><a href="https://www.okx.com/web3/explorer/xlayer-test/address/0x295975cbec1673061d11c223b35a8513d1ebb213" target="_blank" rel="noreferrer">0x295975...bb213</a></dd></div>
             <div><dt>Signing authority</dt><dd>OKX Wallet only</dd></div>
@@ -101,9 +101,9 @@
             </div>
           </div>
           <div class="task-list">
-            <a href="/evaluate.html"><span>01</span><div><strong>Evaluate a proposed action</strong><p>Configure rules and produce a deterministic receipt.</p></div><b aria-hidden="true">→</b></a>
-            <a href="/onchain.html"><span>02</span><div><strong>Register policy and anchor evidence</strong><p>Use OKX Wallet with the canonical X Layer contract.</p></div><b aria-hidden="true">→</b></a>
-            <a href="/integrate.html"><span>03</span><div><strong>Integrate with an agent</strong><p>Use the public JSON API or official x402 endpoint.</p></div><b aria-hidden="true">→</b></a>
+            <a href="/evaluate.html"><span>01</span><div><strong>Preflight a proposed action</strong><p>Configure rules and receive a free, non-binding routing status.</p></div><b aria-hidden="true">→</b></a>
+            <a href="/integrate.html"><span>02</span><div><strong>Request a formal decision</strong><p>Use official OKX x402 for detailed evidence and deterministic hashes.</p></div><b aria-hidden="true">→</b></a>
+            <a href="/onchain.html"><span>03</span><div><strong>Register policy and anchor evidence</strong><p>Use OKX Wallet with the canonical X Layer contract.</p></div><b aria-hidden="true">→</b></a>
           </div>
         </div>
       </section>
@@ -116,7 +116,7 @@
           </div>
         </div>
         <div class="boundary-grid">
-          <div><strong>TXSENTINEL</strong><p>Normalizes inputs, checks user-defined rules, and produces reproducible evidence.</p></div>
+          <div><strong>TXSENTINEL</strong><p>Routes actions for free and returns formal, reproducible evidence after x402 settlement.</p></div>
           <div><strong>OKX WALLET</strong><p>Shows the transaction and remains the only place where the user can authorize signing.</p></div>
           <div><strong>X LAYER</strong><p>Preserves policy revisions and receipt hashes so the decision can be verified later.</p></div>
         </div>

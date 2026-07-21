@@ -139,10 +139,6 @@ function requestPayload() {
   return payload;
 }
 
-function shortHash(hash) {
-  return hash ? `${hash.slice(0, 12)}...${hash.slice(-10)}` : "-";
-}
-
 function resetReceipt() {
   latestResponse = null;
   byId("empty-receipt").classList.remove("hidden");
@@ -151,7 +147,7 @@ function resetReceipt() {
   const badge = byId("decision-badge");
   badge.textContent = "READY";
   badge.className = "decision-badge idle";
-  evaluateButton.querySelector("span").textContent = "Evaluate transaction";
+  evaluateButton.querySelector("span").textContent = "Run free preflight";
 }
 
 function updateReview() {
@@ -196,47 +192,24 @@ function canAdvance() {
   return byId("amount").reportValidity();
 }
 
-function renderReceipt(response) {
+function renderPreflight(response) {
   latestResponse = response;
-  const result = response.result;
-  const decision = result.decision.toLowerCase();
+  const preflight = response.preflight;
+  const statusClass = { READY: "allow", REVIEW: "hold", BLOCKED: "deny" }[preflight.status] || "idle";
   const badge = byId("decision-badge");
-  badge.textContent = result.decision;
-  badge.className = `decision-badge ${decision}`;
+  badge.textContent = preflight.status;
+  badge.className = `decision-badge ${statusClass}`;
   byId("empty-receipt").classList.add("hidden");
   byId("error-panel").classList.add("hidden");
   byId("receipt-content").classList.remove("hidden");
-  byId("risk-value").textContent = result.riskScore;
-  const riskBar = byId("risk-bar");
-  riskBar.style.width = `${result.riskScore}%`;
-  riskBar.style.background = result.riskScore >= 100 ? "var(--red)" : result.riskScore >= 60 ? "var(--amber)" : "var(--lime)";
-  byId("policy-version").textContent = result.policyVersion;
-  byId("action-digest").textContent = shortHash(result.actionDigest);
-  byId("action-digest").title = result.actionDigest;
-  byId("receipt-hash").textContent = shortHash(result.receiptHash);
-  byId("receipt-hash").title = result.receiptHash;
-  byId("evaluated-at").textContent = new Date(response.evaluatedAt).toLocaleTimeString();
+  byId("preflight-access").textContent = "Free preflight";
+  byId("preflight-binding").textContent = preflight.binding ? "Yes" : "No";
+  byId("preflight-receipt").textContent = preflight.receiptIssued ? "Issued" : "Not issued";
+  byId("evaluated-at").textContent = new Date(response.checkedAt).toLocaleTimeString();
+  byId("preflight-next-title").textContent = preflight.next.action.replaceAll("_", " ");
+  byId("preflight-next").textContent = `${preflight.next.label}. The formal paid endpoint returns detailed evidence and deterministic hashes.`;
   byId("raw-response").textContent = JSON.stringify(response, null, 2);
-  evaluateButton.querySelector("span").textContent = "Re-evaluate transaction";
-
-  const reasonList = byId("reason-list");
-  reasonList.replaceChildren();
-  result.reasons.forEach((reason) => {
-    const row = document.createElement("div");
-    row.className = `reason-row ${reason.severity}`;
-    const dot = document.createElement("i");
-    dot.className = "reason-dot";
-    const content = document.createElement("div");
-    const code = document.createElement("strong");
-    code.textContent = reason.code;
-    const detail = document.createElement("p");
-    detail.textContent = reason.detail;
-    const severity = document.createElement("em");
-    severity.textContent = reason.severity;
-    content.append(code, detail);
-    row.append(dot, content, severity);
-    reasonList.append(row);
-  });
+  evaluateButton.querySelector("span").textContent = "Run preflight again";
 }
 
 function renderError(message) {
@@ -253,42 +226,31 @@ async function evaluate(event) {
   event.preventDefault();
   evaluateButton.disabled = true;
   evaluateButton.setAttribute("aria-busy", "true");
-  evaluateButton.querySelector("span").textContent = "Evaluating policy...";
+  evaluateButton.querySelector("span").textContent = "Running preflight...";
 
   try {
-    const response = await fetch("/api/check", {
+    const response = await fetch("/api/preflight", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestPayload())
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.issues?.map((issue) => `${issue.path}: ${issue.message}`).join("; ") || body.error);
-    renderReceipt(body);
+    renderPreflight(body);
   } catch (error) {
     renderError(error instanceof Error ? error.message : "The evaluation could not be completed.");
   } finally {
     evaluateButton.disabled = false;
     evaluateButton.removeAttribute("aria-busy");
-    evaluateButton.querySelector("span").textContent = latestResponse ? "Re-evaluate transaction" : "Evaluate transaction";
+    evaluateButton.querySelector("span").textContent = latestResponse ? "Run preflight again" : "Run free preflight";
   }
 }
 
-async function copyReceipt() {
+async function copyPreflight() {
   if (!latestResponse) return;
   await navigator.clipboard.writeText(JSON.stringify(latestResponse, null, 2));
-  byId("copy-receipt").textContent = "Copied";
-  window.setTimeout(() => { byId("copy-receipt").textContent = "Copy JSON"; }, 1200);
-}
-
-function downloadReceipt() {
-  if (!latestResponse) return;
-  const blob = new Blob([JSON.stringify(latestResponse, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `txsentinel-${latestResponse.result.decision.toLowerCase()}-${latestResponse.result.receiptHash.slice(2, 10)}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
+  byId("copy-preflight").textContent = "Copied";
+  window.setTimeout(() => { byId("copy-preflight").textContent = "Copy preflight JSON"; }, 1200);
 }
 
 document.querySelectorAll(".scenario-tab").forEach((tab) => {
@@ -307,7 +269,6 @@ previousButton.addEventListener("click", () => showStep(currentStep - 1));
 document.querySelectorAll(".wizard-step").forEach((button) => {
   button.addEventListener("click", () => showStep(Number(button.dataset.step)));
 });
-byId("copy-receipt").addEventListener("click", copyReceipt);
-byId("download-receipt").addEventListener("click", downloadReceipt);
+byId("copy-preflight").addEventListener("click", copyPreflight);
 loadScenario("safe");
 showStep(1);

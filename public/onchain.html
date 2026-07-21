@@ -12,7 +12,7 @@
     <header class="app-header">
       <div class="header-inner">
         <a class="brand" href="/" aria-label="TxSentinel overview"><img src="/txsentinel-avatar.png" alt="" width="40" height="40" /><span><strong>TxSentinel</strong><small>Agent transaction control</small></span></a>
-        <nav class="primary-nav" aria-label="Primary navigation"><a href="/">Overview</a><a href="/evaluate.html">Evaluate</a><a class="active" href="/onchain.html" aria-current="page">Onchain</a><a href="/integrate.html">Integrate</a></nav>
+        <nav class="primary-nav" aria-label="Primary navigation"><a href="/">Overview</a><a href="/evaluate.html">Preflight</a><a class="active" href="/onchain.html" aria-current="page">Onchain</a><a href="/integrate.html">Integrate</a></nav>
         <div class="service-status" aria-label="Wallet status"><span id="wallet-chip" class="status-chip muted"><i></i>Wallet disconnected</span><span id="network-chip" class="status-chip muted"><i></i>X Layer Testnet</span></div>
       </div>
     </header>
@@ -60,13 +60,13 @@
 
       <section class="process-section per-action-section" aria-labelledby="receipt-step-heading">
         <div class="section-heading">
-          <div><p class="section-label">PER ACTION</p><h2 id="receipt-step-heading">Evaluate and anchor evidence</h2></div>
-          <p>Repeat this step for each proposed action that needs a verifiable receipt.</p>
+          <div><p class="section-label">PER PAID DECISION</p><h2 id="receipt-step-heading">Load and anchor formal evidence</h2></div>
+          <p>Only a formal receipt returned after x402 settlement is eligible for this browser workflow.</p>
         </div>
         <div class="deployment-step receipt-step">
           <div class="step-index">04</div>
-          <div class="step-copy"><h3>Create a live deterministic receipt</h3><p>The API evaluates a sample action. OKX Wallet then anchors the policy revision, decision, action digest, and receipt hash.</p><div id="anchor-preview" class="anchor-preview"><span>Run the live evaluation to prepare an anchor transaction.</span></div></div>
-          <div class="step-actions"><button id="evaluate-live" class="step-command secondary" type="button">Evaluate live</button><button id="anchor-receipt" class="step-command" type="button" disabled>Anchor receipt</button></div>
+          <div class="step-copy"><h3>Load the latest paid receipt</h3><p>Complete the x402 flow on the Integrate page first. OKX Wallet can then anchor its policy revision, decision, action digest, and receipt hash.</p><div id="anchor-preview" class="anchor-preview"><span>No paid receipt has been loaded in this browser session.</span></div></div>
+          <div class="step-actions"><button id="evaluate-live" class="step-command secondary" type="button">Load paid receipt</button><button id="anchor-receipt" class="step-command" type="button" disabled>Anchor receipt</button></div>
         </div>
       </section>
 

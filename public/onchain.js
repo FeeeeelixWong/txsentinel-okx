@@ -106,7 +106,10 @@ function setActivity(title, detail, link = "", isError = false) {
   byId("transaction-panel").classList.toggle("error", isError);
   const anchor = byId("activity-link");
   anchor.classList.toggle("hidden", !link);
-  if (link) anchor.href = link;
+  if (link) {
+    anchor.href = link;
+    anchor.textContent = link.startsWith("/") ? "Open formal check" : "View on explorer";
+  }
 }
 
 function setBusy(value) {
@@ -334,38 +337,26 @@ async function registerPolicy() {
   }
 }
 
-async function evaluateLive() {
+async function loadPaidReceipt() {
   setBusy(true);
   try {
-    const response = await fetch("/api/check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chain: "xlayer",
-        operation: "transfer",
-        to: "0x4a6aae28b27681856ae824af82fea87896ecc3ed",
-        amountUsd: 25,
-        policy: artifact.defaults.policy,
-        simulation: {
-          status: "succeeded",
-          estimatedFeeUsd: 0.01,
-          slippageBps: 0,
-          contractVerified: false
-        }
-      })
-    });
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error || "Policy API request failed.");
-    latestReceipt = body.result;
+    const stored = window.localStorage.getItem("txsentinel.latestPaidReceipt");
+    if (!stored) throw new Error("No paid receipt was found. Complete the x402 check on the Integrate page first.");
+    const parsed = JSON.parse(stored);
+    const candidate = parsed.result;
+    if (!["ALLOW", "HOLD", "DENY"].includes(candidate?.decision)) throw new Error("The stored receipt has an invalid decision.");
+    if (!/^0x[0-9a-f]{64}$/i.test(candidate?.actionDigest || "")) throw new Error("The stored action digest is invalid.");
+    if (!/^0x[0-9a-f]{64}$/i.test(candidate?.receiptHash || "")) throw new Error("The stored receipt hash is invalid.");
+    latestReceipt = candidate;
     byId("anchor-preview").innerHTML = `
       <div><span>DECISION</span><strong class="${latestReceipt.decision.toLowerCase()}">${latestReceipt.decision}</strong></div>
       <div><span>ACTION</span><code title="${latestReceipt.actionDigest}">${shortHex(latestReceipt.actionDigest)}</code></div>
       <div><span>RECEIPT</span><code title="${latestReceipt.receiptHash}">${shortHex(latestReceipt.receiptHash)}</code></div>
     `;
     byId("receipt-value").textContent = `${latestReceipt.decision} / prepared`;
-    setActivity("Live receipt prepared", "The public policy API returned deterministic hashes ready for onchain anchoring.");
+    setActivity("Paid receipt loaded", "The formal x402 policy response is ready for optional wallet attestation.");
   } catch (error) {
-    setActivity("Evaluation failed", error?.message || "The API request could not be completed.", "", true);
+    setActivity("Paid receipt unavailable", error?.message || "The paid policy response could not be loaded.", "/integrate.html#x402-payment-heading", true);
   } finally {
     setBusy(false);
   }
@@ -436,6 +427,6 @@ async function initialize() {
 
 byId("connect-wallet").addEventListener("click", connectWallet);
 byId("register-policy").addEventListener("click", registerPolicy);
-byId("evaluate-live").addEventListener("click", evaluateLive);
+byId("evaluate-live").addEventListener("click", loadPaidReceipt);
 byId("anchor-receipt").addEventListener("click", anchorReceipt);
 initialize().catch((error) => setActivity("Initialization failed", error.message, "", true));

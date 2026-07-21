@@ -2,6 +2,7 @@ sequenceDiagram
   actor A as Agent or user
   participant T as TxSentinel API
   participant W as OKX Wallet
+  participant F as OKX facilitator
   participant C as Canonical X Layer contract
   participant D as Target dApp or recipient
 
@@ -9,10 +10,26 @@ sequenceDiagram
   W->>C: registerPolicy(policyKey, policyHash, versionHash)
   C-->>W: PolicyRegistered(owner, revision 1)
 
-  Note over A,C: EACH POLICY EVALUATION
-  A->>T: POST /api/check(action, policy, evidence)
-  T->>T: Normalize, validate, evaluate, hash
-  T-->>A: decision + reasons + actionDigest + receiptHash
+  Note over A,T: FREE READINESS, NO FORMAL RECEIPT
+  A->>T: POST /api/preflight(action, policy, evidence)
+  T->>T: Validate and run basic readiness screen
+  T-->>A: READY / REVIEW / BLOCKED
+
+  Note over A,F: FORMAL PAID POLICY CHECK
+  A->>T: POST /api/check-paid(action, policy, evidence)
+  T->>T: Validate and precompute before payment
+  alt Invalid request
+    T-->>A: 422, no payment challenge
+  else Valid request
+    T-->>A: 402 PAYMENT-REQUIRED
+    A->>W: Review exact seller terms
+    W-->>A: PAYMENT-SIGNATURE
+    A->>T: Retry with payment proof
+    T->>F: Verify and settle
+    F->>C: X Layer service payment
+    F-->>T: PAYMENT-RESPONSE
+    T-->>A: ALLOW / HOLD / DENY + evidence + hashes
+  end
 
   opt Independently verifiable evidence
     A->>W: Ask to attest receipt
