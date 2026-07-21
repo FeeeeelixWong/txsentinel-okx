@@ -26,6 +26,7 @@
 - [可视化产品指南](docs/VISUAL_GUIDE.md)
 - [架构与信任边界](ARCHITECTURE.md)
 - [API 协议](docs/API.md)
+- [买方、卖方与被检查交易](#buyer-seller-zh)
 - [策略常见问题](#policy-faq-zh)
 
 ## 🗺️ 一张图看懂产品
@@ -108,6 +109,48 @@ TxSentinel 将免费审核和付费服务隔离为两个独立入口：
 
 完整信任边界见 [ARCHITECTURE.md](ARCHITECTURE.md)，请求格式见 [docs/API.md](docs/API.md)。
 
+<a id="buyer-seller-zh"></a>
+
+## 💱 买方、卖方与被检查交易
+
+![TxSentinel 买方与卖方角色](docs/assets/x402-buyer-seller.svg)
+
+付费接口中会同时出现两类金额，不能混为一谈：
+
+1. **x402 服务费：** 调用 TxSentinel 付费策略接口的费用。价格、收款地址和可接受币种由卖方控制。
+2. **被检查交易：** 智能体希望执行的交易提案。买方智能体提交 `to`、`amountUsd` 等字段，用户 Policy 决定这笔交易是否可以继续。
+
+### 每项内容由谁控制？
+
+| 内容 | 控制方 | 买方操作 |
+| --- | --- | --- |
+| x402 服务价格 | 卖方在服务端配置 | 查看报价，但不能调低价格 |
+| x402 收款地址（`PAY_TO_ADDRESS`） | 卖方在服务端配置 | 核对收款人，但不能重定向 |
+| 可接受支付币种 | 卖方公布支持列表 | 从 USD₮0、USDG、USDC 中选择一种 |
+| 被检查交易的 `to`、`amountUsd` | 买方、用户或获授权智能体 | 在钱包签名前提交交易提案 |
+| Policy 限制 | Policy 所有者 | 智能体不能自行放宽规则 |
+| 支付授权 | 买方钱包 | 每次支付都明确批准或拒绝 |
+| 策略结果与凭证 | TxSentinel | 获得确定性的 `ALLOW`、`HOLD` 或 `DENY` 证据 |
+
+### 卖方如何操作？
+
+1. 在服务端配置 facilitator 凭证、`X402_PRICE`、`PAY_TO_ADDRESS` 和可接受币种。
+2. 开放受保护接口；TxSentinel 通过标准 HTTP 402 challenge 返回这些服务端条款。
+3. 买方批准精确条款后完成收款，再返回付费策略结果和结算凭证。
+
+当前线上版本是**单卖方实现**：TxSentinel 本身就是卖方，配置保存在部署环境变量中。
+生产级多卖方版本需要增加钱包验权的卖方后台，并根据服务端 `sellerId` 配置加载价格、
+收款地址和币种，而不是把这些字段开放给买方修改。
+
+### 买方如何操作？
+
+1. 智能体提交被检查交易，并收到卖方确定的支付条款。
+2. 买方可以选择一种受支持币种，核对金额和收款人，然后连接 OKX Wallet。
+3. 钱包只有在买方明确批准后才会签名，请求随后携带支付证明重试。
+4. 结算成功后，买方同时获得策略决策与可验证支付凭证。
+
+这种分工既能防止买方把服务费改成零或替换收款地址，也保留了买方或智能体定义被检查交易的能力。
+
 ## 🧑‍💻 本地开发
 
 ```bash
@@ -155,7 +198,7 @@ X Layer 官方水龙头领取，每次支付都必须由钱包重新明确确认
 | Vercel 中的 OKX Developer Portal API 凭证 | ✅ 已作为加密生产环境变量配置 |
 | `PAY_TO_ADDRESS` EVM 收款地址 | ✅ 已出现在线上 402 challenge 中 |
 | OKX Wallet 浏览器买方流程 | ✅ 已上线至 [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
-| 买方钱包中的 X Layer 测试网 USD₮0 | ⏳ 待准备 |
+| 买方钱包中的 X Layer 测试资产 | ✅ 已准备 |
 | 结算交易哈希与 `PAYMENT-RESPONSE` 证据 | ⏳ 需要买方确认一次测试支付 |
 
 打开 `/integrate.html` 中的在线结算实验区，即可用 OKX Wallet 跑通
@@ -244,4 +287,4 @@ test/                 策略和 HTTP 合约测试
 - ✅ 官方 x402 服务端集成：已实现
 - ✅ x402 卖方配置：facilitator 凭证和 `PAY_TO_ADDRESS` 已在线
 - ✅ 浏览器买方流程：报价、OKX Wallet 连接、余额检查、签名、重试和回执展示已实现
-- ⏳ 真实 x402 结算证明：等待一个持有 X Layer 测试网 USD₮0 的买方钱包确认测试支付
+- ⏳ 真实 x402 结算证明：等待买方确认一次测试支付

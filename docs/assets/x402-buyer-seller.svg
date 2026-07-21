@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">TxSentinel buyer, seller, and protected action roles</title>
+  <desc id="desc">The seller configures x402 service terms, the buyer chooses an accepted asset and authorizes payment, and the agent separately supplies the action that TxSentinel evaluates.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9da7b1"/>
+    </marker>
+    <style>
+      .surface { fill: #111820; stroke: #39434c; stroke-width: 2; }
+      .panel { fill: #171d23; stroke: #4a555f; stroke-width: 2; }
+      .label { fill: #8b949e; font: 700 15px ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .heading { fill: #f0f3f5; font: 700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .body { fill: #bdc6ce; font: 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .small { fill: #8b949e; font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .lime { fill: #cbf43e; }
+      .cyan { fill: #55d6d2; }
+      .amber { fill: #e8b44b; }
+      .line { fill: none; stroke: #9da7b1; stroke-width: 2; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #56616b; stroke-width: 2; stroke-dasharray: 7 7; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="560" rx="8" fill="#0d1117"/>
+  <text x="42" y="43" class="label">X402 SERVICE PAYMENT</text>
+
+  <rect x="42" y="67" width="270" height="205" rx="7" class="panel"/>
+  <text x="66" y="101" class="label lime">SELLER</text>
+  <text x="66" y="136" class="heading">Configures terms</text>
+  <text x="66" y="170" class="body">Service price</text>
+  <text x="66" y="198" class="body">Receiving address</text>
+  <text x="66" y="226" class="body">Accepted assets</text>
+  <text x="66" y="253" class="small">Stored and enforced server-side</text>
+
+  <rect x="438" y="67" width="324" height="205" rx="7" class="surface"/>
+  <text x="462" y="101" class="label cyan">TXSENTINEL X402 API</text>
+  <text x="462" y="136" class="heading">Issues verifiable terms</text>
+  <rect x="462" y="157" width="276" height="45" rx="5" fill="#0d1117" stroke="#39434c"/>
+  <text x="482" y="185" class="body">HTTP 402 + PAYMENT-REQUIRED</text>
+  <text x="462" y="229" class="small">Amount and recipient are read-only</text>
+  <text x="462" y="251" class="small">in the buyer payment flow.</text>
+
+  <rect x="888" y="67" width="270" height="205" rx="7" class="panel"/>
+  <text x="912" y="101" class="label amber">BUYER</text>
+  <text x="912" y="136" class="heading">Reviews and approves</text>
+  <text x="912" y="170" class="body">Chooses one offered asset</text>
+  <text x="912" y="198" class="body">Checks amount and recipient</text>
+  <text x="912" y="226" class="body">Approves or rejects in wallet</text>
+  <text x="912" y="253" class="small">Cannot rewrite seller terms</text>
+
+  <path d="M312 145 H438" class="line"/>
+  <text x="337" y="132" class="small">configure</text>
+  <path d="M762 145 H888" class="line"/>
+  <text x="792" y="132" class="small">quote</text>
+  <path d="M888 224 C835 302 796 302 738 224" class="line"/>
+  <text x="770" y="306" class="small">wallet authorization</text>
+
+  <path d="M42 315 H1158" class="dash"/>
+  <text x="42" y="351" class="label">SEPARATE PROTECTED ACTION</text>
+
+  <rect x="42" y="375" width="300" height="139" rx="7" class="panel"/>
+  <text x="66" y="409" class="label amber">BUYER OR AGENT</text>
+  <text x="66" y="444" class="heading">Proposes an action</text>
+  <text x="66" y="477" class="body">to + amountUsd + policy + evidence</text>
+
+  <rect x="450" y="375" width="300" height="139" rx="7" class="surface"/>
+  <text x="474" y="409" class="label cyan">TXSENTINEL POLICY ENGINE</text>
+  <text x="474" y="444" class="heading">Evaluates before signing</text>
+  <text x="474" y="477" class="body">No custody and no broadcast authority</text>
+
+  <rect x="858" y="375" width="300" height="139" rx="7" class="panel"/>
+  <text x="882" y="409" class="label lime">DETERMINISTIC RESULT</text>
+  <text x="882" y="444" class="heading">ALLOW / HOLD / DENY</text>
+  <text x="882" y="477" class="body">Policy receipt returned to the caller</text>
+
+  <path d="M342 445 H450" class="line"/>
+  <path d="M750 445 H858" class="line"/>
+</svg>

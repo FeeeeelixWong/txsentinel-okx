@@ -56,6 +56,8 @@
               <li id="payment-step-receipt"><span>04</span><div><strong>Receipt</strong><small>Verify the settlement proof</small></div></li>
             </ol>
 
+            <p class="payment-terms-note"><strong>Seller terms:</strong> price and recipient come from the server. The buyer may choose an accepted asset and approve or reject the quote, but cannot rewrite it.</p>
+
             <fieldset class="payment-token-picker">
               <legend>Payment asset</legend>
               <label><input type="radio" name="x402-token" value="TEST_USDT0" checked /><span><b>test USD₮0</b><small>Testnet</small></span></label>
@@ -82,15 +84,20 @@
             </div>
             <dl class="receipt-facts payment-facts">
               <div><dt>Network</dt><dd id="x402-network">—</dd></div>
-              <div><dt>Token / amount</dt><dd id="x402-amount">—</dd></div>
-              <div><dt>Pay to</dt><dd id="x402-pay-to">—</dd></div>
-              <div><dt>Buyer</dt><dd id="x402-buyer">—</dd></div>
+              <div><dt>Service token / price</dt><dd id="x402-amount">—</dd></div>
+              <div><dt>Seller recipient</dt><dd id="x402-pay-to">—</dd></div>
+              <div><dt>Buyer wallet</dt><dd id="x402-buyer">—</dd></div>
               <div><dt>Buyer balance</dt><dd id="x402-balance">—</dd></div>
               <div><dt>Transaction</dt><dd id="x402-transaction">—</dd></div>
             </dl>
             <a id="x402-explorer" class="secondary-link payment-explorer hidden" href="#" target="_blank" rel="noreferrer">Open settlement on explorer</a>
           </div>
         </div>
+      </section>
+
+      <section class="boundary-section" aria-labelledby="payment-roles-heading">
+        <div class="section-heading"><div><p class="section-label">PAYMENT ROLES</p><h2 id="payment-roles-heading">One quote, three separate responsibilities</h2></div></div>
+        <div class="boundary-grid"><div><strong>SELLER CONFIGURES</strong><p>Service price, receiving address, accepted assets, and protected endpoint. These terms are server-controlled.</p></div><div><strong>BUYER AUTHORIZES</strong><p>One advertised asset, the exact quote, and the OKX Wallet signature. The buyer can always reject.</p></div><div><strong>AGENT PROPOSES</strong><p>The separate action destination, amount, policy, and evidence that TxSentinel evaluates before signing.</p></div></div>
       </section>
 
       <section class="integration-runbook" aria-labelledby="integration-heading">

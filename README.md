@@ -26,6 +26,7 @@ custody, signing transactions, or broadcasting them.
 - [Visual product guide](docs/VISUAL_GUIDE.md)
 - [Architecture and trust boundaries](ARCHITECTURE.md)
 - [API contract](docs/API.md)
+- [Buyer and seller model](#buyer-seller-and-the-protected-action)
 - [Policy FAQ](#policy-faq)
 
 ## 🗺️ Product in One Picture
@@ -104,6 +105,50 @@ When activated, an unpaid request receives HTTP `402` with `PAYMENT-REQUIRED`. A
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the exact trust boundary and [docs/API.md](docs/API.md) for the request contract.
 
+<a id="buyer-seller-and-the-protected-action"></a>
+
+## 💱 Buyer, Seller, and the Protected Action
+
+![TxSentinel buyer and seller roles](docs/assets/x402-buyer-seller.svg)
+
+Two different values travel through the paid endpoint and must not be confused:
+
+1. **x402 service payment:** the fee for calling TxSentinel's metered policy API. The seller controls its price, receiving address, and accepted assets.
+2. **Protected action:** the transaction proposal being evaluated. The buyer's agent supplies fields such as `to` and `amountUsd`, while the user's policy determines whether that action is allowed.
+
+### Who controls each value?
+
+| Value or decision | Controlled by | Buyer experience |
+| --- | --- | --- |
+| x402 service price | Seller, configured server-side | Reviews the quoted amount; cannot reduce it |
+| x402 receiving address (`PAY_TO_ADDRESS`) | Seller, configured server-side | Verifies the recipient; cannot redirect it |
+| Accepted payment assets | Seller advertises the supported set | Chooses one advertised asset: USD₮0, USDG, or USDC |
+| Protected action `to` and `amountUsd` | Buyer, user, or authorized agent | Supplies the proposal before wallet signing |
+| Policy limits | Policy owner | The agent cannot silently loosen them |
+| Payment authorization | Buyer wallet | Explicitly approves or rejects every payment |
+| Policy result and receipt | TxSentinel | Receives deterministic `ALLOW`, `HOLD`, or `DENY` evidence |
+
+### Seller operation
+
+1. Configure facilitator credentials, `X402_PRICE`, `PAY_TO_ADDRESS`, and accepted assets on the server.
+2. Expose the protected endpoint. TxSentinel returns those server-controlled terms in a standard HTTP 402 challenge.
+3. Receive settlement only after the buyer approves the exact terms, then return the paid policy result and receipt.
+
+The current live deployment is a **single-seller implementation**: TxSentinel is the seller and its
+settings are deployment environment variables. A production multi-seller version would add a
+wallet-verified seller dashboard and load price, recipient, and assets from a server-side `sellerId`
+profile. It would not make these fields editable by the buyer.
+
+### Buyer operation
+
+1. The agent submits the protected action and receives the seller's server-issued payment terms.
+2. The buyer may choose one accepted token, review the amount and recipient, and connect OKX Wallet.
+3. The wallet signs only after explicit approval. The request is retried with payment proof.
+4. After settlement, the buyer receives both the policy decision and a verifiable payment receipt.
+
+This separation prevents a buyer from changing the fee to zero or redirecting it to another address,
+while still allowing the buyer or agent to define the transaction that TxSentinel evaluates.
+
 ## 🧑‍💻 Local Development
 
 ```bash
@@ -148,7 +193,7 @@ The addresses were verified from the [official faucet contract's outgoing token 
 | OKX Developer Portal API credentials in Vercel | ✅ Configured as encrypted production variables |
 | EVM receiving address in `PAY_TO_ADDRESS` | ✅ Present in the live 402 challenge |
 | Browser buyer flow with OKX Wallet | ✅ Live on [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
-| Buyer wallet funded with X Layer Testnet USD₮0 | ⏳ Required |
+| Buyer wallet funded with X Layer Testnet assets | ✅ Ready |
 | Settled transaction hash and `PAYMENT-RESPONSE` evidence | ⏳ Requires one buyer-confirmed test payment |
 
 Open the live settlement lab on `/integrate.html` to run the documented
@@ -240,4 +285,4 @@ test/                 Policy and HTTP contract tests
 - ✅ Official x402 server integration: implemented
 - ✅ x402 seller configuration: facilitator credentials and `PAY_TO_ADDRESS` are live
 - ✅ Browser buyer flow: quote, OKX Wallet connection, balance check, signing, retry, and receipt rendering are implemented
-- ⏳ Real x402 settlement proof: waiting for one buyer wallet with X Layer Testnet USD₮0 to confirm the test payment
+- ⏳ Real x402 settlement proof: waiting for a buyer-confirmed test payment

@@ -53,6 +53,15 @@ new contract. An inactive policy fails closed and cannot accept new receipt anch
 
 ## 6. Trust Boundary
 
+![Buyer, seller, and protected action](assets/x402-buyer-seller.svg)
+
+The x402 service payment and the protected action are separate. The seller sets the service price,
+receiving address, and accepted assets on the server. The buyer chooses one advertised asset and
+explicitly approves or rejects those terms. Separately, the buyer's agent supplies the proposed
+action destination and amount that TxSentinel evaluates. Allowing the buyer to rewrite the x402
+price or recipient would let it bypass payment, so those fields are intentionally read-only in the
+buyer flow.
+
 | Component | Can do | Cannot do |
 | --- | --- | --- |
 | TxSentinel API | Validate proposals, evaluate policy, produce deterministic hashes | Read a private key, sign, or broadcast |

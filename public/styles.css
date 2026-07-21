@@ -280,6 +280,8 @@ pre { max-height: 390px; margin: 0; padding: 16px; overflow: auto; border: 1px s
 .payment-progress li.active { background: var(--surface-raised); color: var(--text-secondary); }
 .payment-progress li.active > span { border-color: var(--lime); color: var(--lime); }
 .payment-progress li.complete > span { border-color: var(--lime); background: var(--lime); color: #090c0d; }
+.payment-terms-note { margin: 14px 0 0; padding: 11px 12px; border-left: 3px solid var(--amber); background: rgba(232, 180, 75, 0.06); color: var(--muted); font-size: 10px; line-height: 1.5; }
+.payment-terms-note strong { color: var(--text-secondary); }
 .payment-token-picker { margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border: 0; }
 .payment-token-picker legend { width: 100%; margin-bottom: 8px; color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
 .payment-token-picker label { position: relative; min-width: 0; cursor: pointer; }
