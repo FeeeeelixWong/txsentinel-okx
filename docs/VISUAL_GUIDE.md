@@ -69,7 +69,16 @@ buyer flow.
 | X Layer anchor | Store policy versions and immutable receipt snapshots | Hold assets, approve tokens, call target contracts, or execute the proposed action |
 | Agent | Propose actions and react to decisions | Bypass wallet confirmation through TxSentinel |
 
-## 7. Current Onchain Evidence
+## 7. End-to-End Role Interaction
+
+![TxSentinel end-to-end x402 interaction](assets/x402-interaction-sequence.svg)
+
+This sequence joins the seller configuration, buyer request, OKX Wallet approval, official
+facilitator settlement, X Layer transfer, and TxSentinel policy response in one view. The service
+payment settles to the seller in steps 9–10. The optional receipt anchor in steps 13–14 is a
+separate evidence transaction and never executes the protected action.
+
+## 8. Current Onchain Evidence
 
 ![Current onchain evidence](assets/visual-onchain-evidence.svg)
 
@@ -78,7 +87,7 @@ buyer flow.
 - [Security review](../SECURITY_REVIEW.md)
 - [Contract source](../contracts/TxSentinelPolicyAnchor.sol)
 
-## 8. Current vs. Future Enforcement
+## 9. Current vs. Future Enforcement
 
 ![Current and future enforcement models](assets/visual-enforcement.svg)
 

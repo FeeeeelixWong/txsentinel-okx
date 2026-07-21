@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1220" viewBox="0 0 1440 1220" role="img" aria-labelledby="title desc">
+  <title id="title">TxSentinel end-to-end buyer, seller, payment, and onchain interaction</title>
+  <desc id="desc">Sequence diagram showing seller setup, buyer request, OKX Wallet authorization, facilitator settlement on X Layer, TxSentinel policy evaluation, and optional receipt anchoring.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a8b2bb"/>
+    </marker>
+    <style>
+      .actor { fill: #171d23; stroke: #4a555f; stroke-width: 2; }
+      .actorTitle { fill: #f0f3f5; font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .actorSub { fill: #8b949e; font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .phase { fill: #8b949e; font: 700 15px ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .step { fill: #f0f3f5; font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .detail { fill: #8b949e; font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .number { fill: #0d1117; font: 700 12px ui-monospace, SFMono-Regular, Menlo, monospace; text-anchor: middle; dominant-baseline: central; }
+      .life { stroke: #56616b; stroke-width: 2; stroke-dasharray: 7 7; }
+      .flow { fill: none; stroke: #a8b2bb; stroke-width: 2; marker-end: url(#arrow); }
+      .return { fill: none; stroke: #55d6d2; stroke-width: 2; marker-end: url(#arrow); }
+      .chain { fill: none; stroke: #cbf43e; stroke-width: 2; marker-end: url(#arrow); }
+      .divider { stroke: #39434c; stroke-width: 2; }
+      .note { fill: #111820; stroke: #39434c; stroke-width: 2; }
+      .noteTitle { fill: #e8b44b; font: 700 14px ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .noteText { fill: #bdc6ce; font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="1220" rx="8" fill="#0d1117"/>
+
+  <rect x="25" y="24" width="180" height="70" rx="7" class="actor"/>
+  <text x="115" y="53" class="actorTitle">Seller</text>
+  <text x="115" y="76" class="actorSub">Service operator</text>
+
+  <rect x="260" y="24" width="180" height="70" rx="7" class="actor"/>
+  <text x="350" y="53" class="actorTitle">Buyer / Agent</text>
+  <text x="350" y="76" class="actorSub">Policy API caller</text>
+
+  <rect x="490" y="24" width="180" height="70" rx="7" class="actor"/>
+  <text x="580" y="53" class="actorTitle">OKX Wallet</text>
+  <text x="580" y="76" class="actorSub">Buyer signing boundary</text>
+
+  <rect x="730" y="24" width="180" height="70" rx="7" class="actor"/>
+  <text x="820" y="53" class="actorTitle">TxSentinel</text>
+  <text x="820" y="76" class="actorSub">x402 + policy API</text>
+
+  <rect x="970" y="24" width="180" height="70" rx="7" class="actor"/>
+  <text x="1060" y="53" class="actorTitle">OKX Facilitator</text>
+  <text x="1060" y="76" class="actorSub">Verify and settle</text>
+
+  <rect x="1210" y="24" width="180" height="70" rx="7" class="actor"/>
+  <text x="1300" y="53" class="actorTitle">X Layer</text>
+  <text x="1300" y="76" class="actorSub">Settlement + evidence</text>
+
+  <line x1="115" y1="94" x2="115" y2="1195" class="life"/>
+  <line x1="350" y1="94" x2="350" y2="1195" class="life"/>
+  <line x1="580" y1="94" x2="580" y2="1195" class="life"/>
+  <line x1="820" y1="94" x2="820" y2="1195" class="life"/>
+  <line x1="1060" y1="94" x2="1060" y2="1195" class="life"/>
+  <line x1="1300" y1="94" x2="1300" y2="1195" class="life"/>
+
+  <text x="28" y="128" class="phase">A. SELLER SETUP</text>
+  <circle cx="28" cy="166" r="13" fill="#cbf43e"/><text x="28" y="166" class="number">1</text>
+  <path d="M115 166 H820" class="flow"/>
+  <text x="468" y="151" class="step">Configure service price, payTo, and accepted assets</text>
+  <text x="468" y="181" class="detail">Server-side settings; never supplied by the buyer</text>
+
+  <circle cx="28" cy="226" r="13" fill="#55d6d2"/><text x="28" y="226" class="number">2</text>
+  <path d="M820 226 H115" class="return"/>
+  <text x="468" y="211" class="step">Protected endpoint is ready</text>
+  <text x="468" y="241" class="detail">POST /api/check-paid</text>
+
+  <line x1="25" y1="272" x2="1390" y2="272" class="divider"/>
+  <text x="28" y="307" class="phase">B. PAID POLICY CHECK</text>
+
+  <circle cx="28" cy="350" r="13" fill="#e8b44b"/><text x="28" y="350" class="number">3</text>
+  <path d="M350 350 H820" class="flow"/>
+  <text x="585" y="335" class="step">Submit proposed action + policy + evidence</text>
+  <text x="585" y="365" class="detail">The proposed action has its own to and amountUsd</text>
+
+  <circle cx="28" cy="420" r="13" fill="#55d6d2"/><text x="28" y="420" class="number">4</text>
+  <path d="M820 420 H350" class="return"/>
+  <text x="585" y="405" class="step">HTTP 402 + PAYMENT-REQUIRED</text>
+  <text x="585" y="435" class="detail">Seller service price, recipient, and accepts[]</text>
+
+  <circle cx="28" cy="490" r="13" fill="#e8b44b"/><text x="28" y="490" class="number">5</text>
+  <path d="M350 490 H580" class="flow"/>
+  <text x="465" y="475" class="step">Review quote and choose asset</text>
+  <text x="465" y="505" class="detail">Approve or reject the exact terms</text>
+
+  <circle cx="28" cy="560" r="13" fill="#e8b44b"/><text x="28" y="560" class="number">6</text>
+  <path d="M580 560 H350" class="return"/>
+  <text x="465" y="545" class="step">PAYMENT-SIGNATURE</text>
+  <text x="465" y="575" class="detail">EIP-3009 authorization; private key stays in wallet</text>
+
+  <circle cx="28" cy="630" r="13" fill="#e8b44b"/><text x="28" y="630" class="number">7</text>
+  <path d="M350 630 H820" class="flow"/>
+  <text x="585" y="615" class="step">Retry request with payment proof</text>
+  <text x="585" y="645" class="detail">Buyer cannot alter amount or payTo</text>
+
+  <circle cx="28" cy="700" r="13" fill="#55d6d2"/><text x="28" y="700" class="number">8</text>
+  <path d="M820 700 H1060" class="flow"/>
+  <text x="940" y="685" class="step">Verify and settle</text>
+  <text x="940" y="715" class="detail">Official facilitator API</text>
+
+  <circle cx="28" cy="770" r="13" fill="#cbf43e"/><text x="28" y="770" class="number">9</text>
+  <path d="M1060 770 H1300" class="chain"/>
+  <text x="1180" y="755" class="step">EIP-3009 settlement</text>
+  <text x="1180" y="785" class="detail">Authorized token transfer</text>
+
+  <circle cx="28" cy="840" r="13" fill="#cbf43e"/><text x="28" y="840" class="number">10</text>
+  <path d="M1300 840 H115" class="chain"/>
+  <text x="708" y="825" class="step">Credit the seller's payTo address</text>
+  <text x="708" y="855" class="detail">Onchain service-payment settlement</text>
+
+  <circle cx="28" cy="910" r="13" fill="#55d6d2"/><text x="28" y="910" class="number">11</text>
+  <path d="M1060 910 H820" class="return"/>
+  <text x="940" y="895" class="step">Settlement receipt + transaction hash</text>
+  <text x="940" y="925" class="detail">PAYMENT-RESPONSE</text>
+
+  <circle cx="28" cy="980" r="13" fill="#55d6d2"/><text x="28" y="980" class="number">12</text>
+  <path d="M820 980 H350" class="return"/>
+  <text x="585" y="965" class="step">Evaluate action, return ALLOW / HOLD / DENY</text>
+  <text x="585" y="995" class="detail">Policy result + deterministic receipt</text>
+
+  <line x1="25" y1="1024" x2="1390" y2="1024" class="divider"/>
+  <text x="28" y="1058" class="phase">C. OPTIONAL EVIDENCE ANCHOR</text>
+
+  <circle cx="28" cy="1100" r="13" fill="#e8b44b"/><text x="28" y="1100" class="number">13</text>
+  <path d="M350 1100 H580" class="flow"/>
+  <text x="465" y="1085" class="step">Approve anchorReceipt</text>
+  <text x="465" y="1115" class="detail">Separate wallet transaction</text>
+
+  <circle cx="28" cy="1170" r="13" fill="#cbf43e"/><text x="28" y="1170" class="number">14</text>
+  <path d="M580 1170 H1300" class="chain"/>
+  <text x="940" y="1155" class="step">Store receipt hash on X Layer</text>
+  <text x="940" y="1185" class="detail">Evidence only; does not execute the protected action</text>
+</svg>

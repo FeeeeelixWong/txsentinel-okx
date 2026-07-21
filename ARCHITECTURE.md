@@ -92,6 +92,19 @@ execution.
 
 ## x402 State
 
+### End-to-End Interaction
+
+![TxSentinel end-to-end x402 interaction](docs/assets/x402-interaction-sequence.svg)
+
+The seller configures price, recipient, and accepted assets server-side. The buyer submits the
+protected action, approves the returned quote in OKX Wallet, and retries with payment proof. The
+official OKX facilitator verifies and settles the service payment on X Layer before TxSentinel
+returns the policy result and `PAYMENT-RESPONSE`.
+
+The optional `anchorReceipt` call is a second, buyer-approved wallet transaction that stores only
+the deterministic receipt hash. Neither the x402 settlement nor receipt anchoring executes the
+protected action; execution remains outside TxSentinel's trust boundary.
+
 The official x402 server path is implemented in `api/check-paid.js`. It uses:
 
 - `OKXFacilitatorClient`

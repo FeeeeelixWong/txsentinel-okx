@@ -27,6 +27,7 @@ custody, signing transactions, or broadcasting them.
 - [Architecture and trust boundaries](ARCHITECTURE.md)
 - [API contract](docs/API.md)
 - [Buyer and seller model](#buyer-seller-and-the-protected-action)
+- [End-to-end x402 interaction](#end-to-end-x402-interaction)
 - [Policy FAQ](#policy-faq)
 
 ## 🗺️ Product in One Picture
@@ -148,6 +149,22 @@ profile. It would not make these fields editable by the buyer.
 
 This separation prevents a buyer from changing the fee to zero or redirecting it to another address,
 while still allowing the buyer or agent to define the transaction that TxSentinel evaluates.
+
+<a id="end-to-end-x402-interaction"></a>
+
+### End-to-End x402 Interaction
+
+![TxSentinel end-to-end x402 interaction](docs/assets/x402-interaction-sequence.svg)
+
+- **Steps 1–2:** the seller configures the paid service and publishes a protected endpoint.
+- **Steps 3–12:** the buyer requests a policy check, approves the quoted x402 payment in OKX Wallet,
+  and receives both the settlement receipt and deterministic policy result.
+- **Steps 9–10:** the service payment settles on X Layer to the seller-controlled `payTo` address.
+- **Steps 13–14:** the buyer may separately anchor the policy receipt hash on X Layer. This optional
+  evidence transaction does not execute the protected action and does not give TxSentinel custody.
+
+The protected action itself remains a proposal. An `ALLOW` result permits the buyer's wallet or
+agent workflow to continue, but TxSentinel never signs or broadcasts that action.
 
 ## 🧑‍💻 Local Development
 
