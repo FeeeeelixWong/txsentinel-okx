@@ -26,6 +26,7 @@ custody, signing transactions, or broadcasting them.
 - [Visual product guide](docs/VISUAL_GUIDE.md)
 - [Architecture and trust boundaries](ARCHITECTURE.md)
 - [API contract](docs/API.md)
+- [Project provenance and attribution](NOTICE.md)
 - [Buyer and seller model](#buyer-seller-and-the-protected-action)
 - [End-to-end x402 interaction](#end-to-end-x402-interaction)
 - [Policy FAQ](#policy-faq)

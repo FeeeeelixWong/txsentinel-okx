@@ -26,6 +26,7 @@
 - [可视化产品指南](docs/VISUAL_GUIDE.md)
 - [架构与信任边界](ARCHITECTURE.md)
 - [API 协议](docs/API.md)
+- [项目来源与署名声明](NOTICE.md)
 - [买方、卖方与被检查交易](#buyer-seller-zh)
 - [端到端 x402 角色交互](#x402-interaction-zh)
 - [策略常见问题](#policy-faq-zh)
