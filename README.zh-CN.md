@@ -221,7 +221,27 @@ X Layer 官方水龙头领取，每次支付都必须由钱包重新明确确认
 | `PAY_TO_ADDRESS` EVM 收款地址 | ✅ 已出现在线上 402 challenge 中 |
 | OKX Wallet 浏览器买方流程 | ✅ 已上线至 [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
 | 买方钱包中的 X Layer 测试资产 | ✅ 已准备 |
-| 结算交易哈希与 `PAYMENT-RESPONSE` 证据 | ⏳ 需要买方确认一次测试支付 |
+| 结算交易哈希与链上转账证据 | ✅ [真实结算已验证](https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d) |
+
+### 已验证的真实 x402 结算
+
+2026 年 7 月 21 日 02:57:54 UTC，浏览器买方流程通过官方 x402 路径完成了一笔真实测试结算。
+facilitator 代为提交 EIP-3009 `transferWithAuthorization` 调用，所以顶层交易发送方是 facilitator
+relayer；代币 `Transfer` 事件则直接证明了经买方授权的买方到卖方转账。
+
+| 字段 | 链上验证值 |
+| --- | --- |
+| 网络 | X Layer 测试网，chain ID `1952` |
+| 交易 | [`0x78865316…f70354f68d`](https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d) |
+| 状态 / 区块 | 成功 / `36143837` |
+| 币种 | test USD₮0，[`0x9e29…fb0c`](https://web3.okx.com/zh-hans/explorer/x-layer-testnet/address/0x9e29b3aada05bf2d2c827af80bd28dc0b9b4fb0c) |
+| 金额 | `10,000` 原子单位 = `0.01` test USD₮0 |
+| 授权买方 | `0x0934146ca4f8e611da0ef8bd295ee9f7e34741fe` |
+| 卖方 / `payTo` | `0x4a6aae28b27681856ae824af82fea87896ecc3ed` |
+| Facilitator relayer | `0x40817a0d9043732d48823c05ab2ffb643ef8d90a` |
+
+币种、金额、网络和收款方均与线上 `POST /api/check-paid` 返回的 `PAYMENT-REQUIRED`
+challenge 完全一致。验证方法见[可复核证据记录](./EVIDENCE.md)。
 
 打开 `/integrate.html` 中的在线结算实验区，即可用 OKX Wallet 跑通
 `402 → 选择币种 → 检查余额 → 签名 → 重试 → 结算`。页面会先检查所选网络和
@@ -311,4 +331,4 @@ test/                 策略和 HTTP 合约测试
 - ✅ 官方 x402 服务端集成：已实现
 - ✅ x402 卖方配置：facilitator 凭证和 `PAY_TO_ADDRESS` 已在线
 - ✅ 浏览器买方流程：报价、OKX Wallet 连接、余额检查、签名、重试和回执展示已实现
-- ⏳ 真实 x402 结算证明：等待买方确认一次测试支付
+- ✅ 真实 x402 结算证明：[已由买方确认并在 X Layer 测试网验证](https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d)

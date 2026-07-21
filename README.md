@@ -230,7 +230,28 @@ The addresses were verified from the [official faucet contract's outgoing token 
 | EVM receiving address in `PAY_TO_ADDRESS` | ✅ Present in the live 402 challenge |
 | Browser buyer flow with OKX Wallet | ✅ Live on [`/integrate.html`](https://txsentinel-okx.vercel.app/integrate.html) |
 | Buyer wallet funded with X Layer Testnet assets | ✅ Ready |
-| Settled transaction hash and `PAYMENT-RESPONSE` evidence | ⏳ Requires one buyer-confirmed test payment |
+| Settled transaction hash and onchain transfer evidence | ✅ [Verified live settlement](https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d) |
+
+### Verified live x402 settlement
+
+On July 21, 2026 at 02:57:54 UTC, the browser buyer flow completed a real test settlement through
+the official x402 path. The facilitator relayed an EIP-3009 `transferWithAuthorization` call, so the
+top-level transaction sender is the facilitator relayer while the token event proves the authorized
+buyer-to-seller transfer.
+
+| Field | Verified value |
+| --- | --- |
+| Network | X Layer Testnet, chain ID `1952` |
+| Transaction | [`0x78865316…f70354f68d`](https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d) |
+| Status / block | Success / `36143837` |
+| Asset | test USD₮0, [`0x9e29…fb0c`](https://web3.okx.com/explorer/x-layer-testnet/address/0x9e29b3aada05bf2d2c827af80bd28dc0b9b4fb0c) |
+| Amount | `10,000` atomic units = `0.01` test USD₮0 |
+| Authorized buyer | `0x0934146ca4f8e611da0ef8bd295ee9f7e34741fe` |
+| Seller / `payTo` | `0x4a6aae28b27681856ae824af82fea87896ecc3ed` |
+| Facilitator relayer | `0x40817a0d9043732d48823c05ab2ffb643ef8d90a` |
+
+The asset, amount, network, and recipient exactly match the live `PAYMENT-REQUIRED` challenge from
+`POST /api/check-paid`. See the [reproducible evidence record](./EVIDENCE.md) for the verification method.
 
 Open the live settlement lab on `/integrate.html` to run the documented
 `402 → select asset → check balance → sign → retry → settle` flow with OKX Wallet. The page
@@ -327,4 +348,4 @@ test/                 Policy and HTTP contract tests
 - ✅ Official x402 server integration: implemented
 - ✅ x402 seller configuration: facilitator credentials and `PAY_TO_ADDRESS` are live
 - ✅ Browser buyer flow: quote, OKX Wallet connection, balance check, signing, retry, and receipt rendering are implemented
-- ⏳ Real x402 settlement proof: waiting for a buyer-confirmed test payment
+- ✅ Real x402 settlement proof: [buyer-confirmed and verified on X Layer Testnet](https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d)

@@ -25,6 +25,7 @@ TxSentinel turns those constraints into two deliberate pre-sign surfaces. A free
 - Free readiness preflight: https://txsentinel-okx.vercel.app/api/preflight
 - Formal x402 policy API: https://txsentinel-okx.vercel.app/api/check-paid
 - Source: https://github.com/FeeeeelixWong/txsentinel-okx
+- Verified x402 settlement: https://www.okx.com/web3/explorer/xlayer-test/tx/0x78865316d773400a223c0e76aced95c25def2fba3f0335b79ba64ff70354f68d
 - 30 automated policy, preflight, contract, HTTP, and official x402 middleware tests
 - Deployment smoke for `READY`, `REVIEW`, `BLOCKED`, prepayment validation, and x402 readiness
 
@@ -41,11 +42,12 @@ TxSentinel turns those constraints into two deliberate pre-sign surfaces. A free
 
 TxSentinel separates transaction capability from transaction authority. It does not merely simulate whether a call succeeds. It deterministically proves whether the action complies with a user or organization policy, while keeping the wallet in sole control of signing.
 
-## Current Proof and Remaining Activation
+## Current Proof
 
 The free preflight and formal x402 API are live. Invalid formal requests fail before payment. Valid
-requests receive official OKX x402 terms, and a buyer with X Layer test assets can approve settlement
-in OKX Wallet before the detailed decision and deterministic receipt are revealed.
+requests receive official OKX x402 terms. A buyer completed the browser flow with OKX Wallet, and the
+official facilitator settled `0.01` test USD₮0 on X Layer Testnet. The successful transaction's token,
+amount, buyer, and seller match the live 402 challenge exactly. See [EVIDENCE.md](./EVIDENCE.md).
 
 ## Award Fit
 
