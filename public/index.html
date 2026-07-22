@@ -76,6 +76,55 @@
         </ol>
       </section>
 
+      <section class="comparison-section" aria-labelledby="comparison-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">DECISION PATHS</p>
+            <h2 id="comparison-heading">The same action can take two different paths</h2>
+          </div>
+          <p>Start with a free routing signal. Purchase formal evidence only when the agent needs a decision it can retain and verify.</p>
+        </div>
+
+        <div class="route-comparison" aria-label="Comparison of the free preflight and formal x402 receipt paths">
+          <div class="route-origin">
+            <span>PROPOSED ACTION</span>
+            <strong>Chain, operation, destination, amount, and supplied simulation</strong>
+          </div>
+
+          <div class="route-split" aria-hidden="true"><span></span></div>
+
+          <div class="route-lanes">
+            <article class="route-lane route-lane-free" aria-labelledby="free-path-heading">
+              <header>
+                <div><p>PATH 01 / FREE</p><h3 id="free-path-heading">Readiness preflight</h3></div>
+                <span class="route-state free">NO PAYMENT</span>
+              </header>
+              <ol>
+                <li><span>INPUT</span><p>Basic action fields, policy limits, and supplied simulation evidence.</p></li>
+                <li><span>RESULT</span><p><strong>READY</strong>, <strong>REVIEW</strong>, or <strong>BLOCKED</strong> for routing.</p></li>
+                <li><span>BOUNDARY</span><p>No formal decision, rule evidence, action digest, or receipt hash.</p></li>
+              </ol>
+              <div class="route-outcome"><strong>Use it to decide whether the action deserves a formal check.</strong><a href="/evaluate.html">Run free preflight <span aria-hidden="true">&#8594;</span></a></div>
+            </article>
+
+            <article class="route-lane route-lane-formal" aria-labelledby="formal-path-heading">
+              <header>
+                <div><p>PATH 02 / METERED</p><h3 id="formal-path-heading">Formal x402 receipt</h3></div>
+                <span class="route-state formal">PAID EVIDENCE</span>
+              </header>
+              <ol>
+                <li><span>INPUT</span><p>Normalized action, policy rules, and the x402 payment challenge.</p></li>
+                <li><span>RESULT</span><p><strong>ALLOW</strong>, <strong>HOLD</strong>, or <strong>DENY</strong> after settlement.</p></li>
+                <li><span>EVIDENCE</span><p>Reason codes, risk score, action digest, receipt hash, and payment proof.</p></li>
+              </ol>
+              <div class="route-outcome"><strong>Persist it for review or anchor the formal receipt on X Layer.</strong><a href="/integrate.html#x402-payment-heading">Explore formal check <span aria-hidden="true">&#8594;</span></a></div>
+            </article>
+          </div>
+
+          <p class="route-boundary"><span>AUTHORITY BOUNDARY</span> Neither path signs, broadcasts, or takes custody of the proposed action. Wallet execution remains separate.</p>
+        </div>
+      </section>
+
       <section class="overview-grid" aria-label="Workspace status and tasks">
         <div class="tool-panel status-panel">
           <div class="panel-title">
